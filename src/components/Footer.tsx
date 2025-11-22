@@ -18,16 +18,16 @@ const Footer = () => {
               Transform urban mobility into powerful moving billboards. Reach thousands daily with hyperlocal advertising.
             </p>
             <div className="flex space-x-4">
-              <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
+              <a href="#" className="text-muted-foreground hover:text-primary transition-colors" aria-label="Facebook">
                 <Facebook size={20} />
               </a>
-              <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
+              <a href="#" className="text-muted-foreground hover:text-primary transition-colors" aria-label="Twitter">
                 <Twitter size={20} />
               </a>
-              <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
+              <a href="#" className="text-muted-foreground hover:text-primary transition-colors" aria-label="Instagram">
                 <Instagram size={20} />
               </a>
-              <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
+              <a href="https://www.linkedin.com/company/motionfleet/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors" aria-label="LinkedIn">
                 <Linkedin size={20} />
               </a>
             </div>
@@ -93,8 +93,8 @@ const Footer = () => {
             <ul className="space-y-3">
               <li className="flex items-center space-x-2 text-muted-foreground">
                 <Mail size={16} className="text-primary" />
-                <a href="mailto:hello@motionfleet.com" className="hover:text-primary transition-colors">
-                  hello@motionfleet.com
+                <a href="mailto:motionfleet7@gmail.com" className="hover:text-primary transition-colors">
+                  motionfleet7@gmail.com
                 </a>
               </li>
               <li className="flex items-center space-x-2 text-muted-foreground">
@@ -105,7 +105,7 @@ const Footer = () => {
               </li>
               <li className="flex items-start space-x-2 text-muted-foreground">
                 <MapPin size={16} className="text-primary mt-1" />
-                <span>Mumbai, India</span>
+                <span>Agra, India</span>
               </li>
             </ul>
           </div>

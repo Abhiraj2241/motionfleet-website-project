@@ -75,7 +75,7 @@ const About = () => {
                 Founded by <strong className="text-foreground">Abhiraj Sharma</strong>, a visionary entrepreneur with a passion for innovative marketing solutions, MotionFleet bridges the gap between brands seeking cost-effective local advertising and drivers looking for additional income streams.
               </p>
               <p className="text-lg mb-6">
-                What started as a pilot project with 10 auto-rickshaws in Mumbai has grown into a network spanning multiple cities, serving over 100 brands and partnering with 500+ vehicles. Our technology-first approach ensures transparency, measurable results, and seamless campaign management.
+                What started as a pilot project with 10 auto-rickshaws in Agra has grown into a network serving brands and partnering with vehicles across India. Our technology-first approach ensures transparency, measurable results, and seamless campaign management.
               </p>
               <p className="text-lg">
                 Today, MotionFleet stands at the forefront of hyperlocal advertising, combining traditional outdoor advertising reach with modern digital tracking and analytics capabilities.

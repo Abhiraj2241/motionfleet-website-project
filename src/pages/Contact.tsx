@@ -37,8 +37,8 @@ const Contact = () => {
     {
       icon: Mail,
       title: "Email Us",
-      details: "hello@motionfleet.com",
-      action: "mailto:hello@motionfleet.com",
+      details: "motionfleet7@gmail.com",
+      action: "mailto:motionfleet7@gmail.com",
     },
     {
       icon: Phone,
@@ -50,13 +50,13 @@ const Contact = () => {
       icon: MessageCircle,
       title: "WhatsApp",
       details: "Quick Response",
-      action: "https://wa.me/919876543210",
+      action: "https://wa.me/919876543210?text=Hi%20MotionFleet%2C%20I'm%20interested%20in%20your%20advertising%20services",
     },
     {
       icon: MapPin,
       title: "Visit Us",
-      details: "Mumbai, India",
-      action: "#",
+      details: "Agra, India",
+      action: "https://www.google.com/maps/search/?api=1&query=Agra+India",
     },
   ];
 
@@ -179,7 +179,7 @@ const Contact = () => {
                 <div className="p-6 bg-card rounded-lg border border-border">
                   <h3 className="font-bold mb-3">Service Areas</h3>
                   <p className="text-muted-foreground">
-                    Currently operating in Mumbai, Delhi, Bangalore, and Pune. Expanding to more cities soon!
+                    Headquartered in Agra, India. Currently operating in Agra and expanding to more cities soon!
                   </p>
                 </div>
 
@@ -248,7 +248,7 @@ const Contact = () => {
             <div className="text-center">
               <MapPin className="text-primary mx-auto mb-4" size={48} />
               <p className="text-muted-foreground">Service Coverage Map</p>
-              <p className="text-sm text-muted-foreground">Mumbai | Delhi | Bangalore | Pune</p>
+              <p className="text-sm text-muted-foreground">Headquartered in Agra, India</p>
             </div>
           </div>
         </div>
