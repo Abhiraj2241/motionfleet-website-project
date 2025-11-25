@@ -14,7 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      driver_applications: {
+        Row: {
+          additional_info: string | null
+          approval_status: Database["public"]["Enums"]["approval_status"]
+          city: string
+          created_at: string
+          email: string | null
+          id: string
+          license_number: string | null
+          name: string
+          phone: string
+          updated_at: string
+          vehicle_model: string | null
+          vehicle_type: string
+          vehicle_year: string | null
+        }
+        Insert: {
+          additional_info?: string | null
+          approval_status?: Database["public"]["Enums"]["approval_status"]
+          city: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          license_number?: string | null
+          name: string
+          phone: string
+          updated_at?: string
+          vehicle_model?: string | null
+          vehicle_type: string
+          vehicle_year?: string | null
+        }
+        Update: {
+          additional_info?: string | null
+          approval_status?: Database["public"]["Enums"]["approval_status"]
+          city?: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          license_number?: string | null
+          name?: string
+          phone?: string
+          updated_at?: string
+          vehicle_model?: string | null
+          vehicle_type?: string
+          vehicle_year?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +70,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      approval_status: "pending" | "approved" | "rejected"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +197,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      approval_status: ["pending", "approved", "rejected"],
+    },
   },
 } as const
