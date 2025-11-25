@@ -8,9 +8,12 @@ import { DollarSign, Clock, Shield, Headphones, Car, TrendingUp } from "lucide-r
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useLanguage } from "@/contexts/LanguageContext";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 const Drivers = () => {
   const { toast } = useToast();
+  const { t } = useLanguage();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [licensePhoto, setLicensePhoto] = useState<File | null>(null);
   const [registrationPhoto, setRegistrationPhoto] = useState<File | null>(null);
@@ -29,33 +32,33 @@ const Drivers = () => {
   const benefits = [
     {
       icon: DollarSign,
-      title: "Extra Income",
-      description: "Earn ₹3,000 - ₹8,000 per month just by driving your regular routes",
+      title: t('benefit.income.title'),
+      description: t('benefit.income.desc'),
     },
     {
       icon: Clock,
-      title: "Flexible Commitment",
-      description: "No change to your schedule or routes. Drive as you normally would",
+      title: t('benefit.flexible.title'),
+      description: t('benefit.flexible.desc'),
     },
     {
       icon: Shield,
-      title: "Free Installation",
-      description: "Professional installation and removal at no cost to you",
+      title: t('benefit.installation.title'),
+      description: t('benefit.installation.desc'),
     },
     {
       icon: Headphones,
-      title: "Dedicated Support",
-      description: "24/7 support team ready to help with any questions or concerns",
+      title: t('benefit.support.title'),
+      description: t('benefit.support.desc'),
     },
     {
       icon: Car,
-      title: "No Vehicle Damage",
-      description: "Premium materials that protect your vehicle's original paint",
+      title: t('benefit.vehicle.title'),
+      description: t('benefit.vehicle.desc'),
     },
     {
       icon: TrendingUp,
-      title: "Regular Payments",
-      description: "On-time monthly payments directly to your bank account",
+      title: t('benefit.payment.title'),
+      description: t('benefit.payment.desc'),
     },
   ];
 
@@ -112,8 +115,8 @@ const Drivers = () => {
       if (error) throw error;
 
       toast({
-        title: "Application Received!",
-        description: "Thank you for your interest. Our team will contact you within 24 hours.",
+        title: t('form.success.title'),
+        description: t('form.success.desc'),
       });
 
       setFormData({
@@ -132,8 +135,8 @@ const Drivers = () => {
     } catch (error) {
       console.error('Error submitting application:', error);
       toast({
-        title: "Submission Failed",
-        description: "There was an error submitting your application. Please try again.",
+        title: t('form.error.title'),
+        description: t('form.error.desc'),
         variant: "destructive",
       });
     } finally {
@@ -149,9 +152,12 @@ const Drivers = () => {
       <section className="pt-32 pb-20 bg-gradient-to-br from-background to-card">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center animate-fade-in">
-            <h1 className="mb-6">Drive & Earn with MotionFleet</h1>
+            <div className="flex justify-center mb-6">
+              <LanguageSwitcher />
+            </div>
+            <h1 className="mb-6">{t('hero.title')}</h1>
             <p className="text-xl text-muted-foreground">
-              Turn your auto or rickshaw into a moving billboard and earn extra income without changing your routine
+              {t('hero.subtitle')}
             </p>
           </div>
         </div>
@@ -161,9 +167,9 @@ const Drivers = () => {
       <section className="py-20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="mb-4">Why Join MotionFleet?</h2>
+            <h2 className="mb-4">{t('benefits.title')}</h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Partnership benefits designed with drivers in mind
+              {t('benefits.subtitle')}
             </p>
           </div>
 
@@ -188,39 +194,39 @@ const Drivers = () => {
       <section className="py-20 bg-card/50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="mb-4">Simple 4-Step Process</h2>
+            <h2 className="mb-4">{t('process.title')}</h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              From signup to earning in less than a week
+              {t('process.subtitle')}
             </p>
           </div>
 
           <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="p-6 bg-background rounded-lg border border-border">
               <div className="text-4xl font-bold text-primary mb-4">01</div>
-              <h3 className="text-xl font-bold mb-2">Sign Up</h3>
+              <h3 className="text-xl font-bold mb-2">{t('process.step1.title')}</h3>
               <p className="text-muted-foreground">
-                Fill out the simple application form with your details and vehicle information
+                {t('process.step1.desc')}
               </p>
             </div>
             <div className="p-6 bg-background rounded-lg border border-border">
               <div className="text-4xl font-bold text-primary mb-4">02</div>
-              <h3 className="text-xl font-bold mb-2">Verification</h3>
+              <h3 className="text-xl font-bold mb-2">{t('process.step2.title')}</h3>
               <p className="text-muted-foreground">
-                Our team verifies your documents and vehicle condition (takes 1-2 days)
+                {t('process.step2.desc')}
               </p>
             </div>
             <div className="p-6 bg-background rounded-lg border border-border">
               <div className="text-4xl font-bold text-primary mb-4">03</div>
-              <h3 className="text-xl font-bold mb-2">Installation</h3>
+              <h3 className="text-xl font-bold mb-2">{t('process.step3.title')}</h3>
               <p className="text-muted-foreground">
-                Professional installation of ads at your convenience (30-45 minutes)
+                {t('process.step3.desc')}
               </p>
             </div>
             <div className="p-6 bg-background rounded-lg border border-border">
               <div className="text-4xl font-bold text-primary mb-4">04</div>
-              <h3 className="text-xl font-bold mb-2">Start Earning</h3>
+              <h3 className="text-xl font-bold mb-2">{t('process.step4.title')}</h3>
               <p className="text-muted-foreground">
-                Drive normally and receive monthly payments directly to your account
+                {t('process.step4.desc')}
               </p>
             </div>
           </div>
@@ -231,20 +237,14 @@ const Drivers = () => {
       <section className="py-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto">
-            <h2 className="text-center mb-12">Basic Requirements</h2>
+            <h2 className="text-center mb-12">{t('requirements.title')}</h2>
             <div className="space-y-4">
-              {[
-                "Valid driving license and vehicle registration",
-                "Auto-rickshaw or E-rickshaw in good condition",
-                "Active in Mumbai, Delhi, Bangalore, or Pune (expanding to more cities)",
-                "Willing to maintain ad quality and report any damage",
-                "Drive at least 6 hours daily on regular routes",
-              ].map((requirement, index) => (
+              {['req1', 'req2', 'req3', 'req4', 'req5'].map((req, index) => (
                 <div key={index} className="flex items-start p-4 bg-card rounded-lg border border-border">
                   <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
                     <span className="text-background text-xs font-bold">✓</span>
                   </div>
-                  <span className="text-muted-foreground">{requirement}</span>
+                  <span className="text-muted-foreground">{t(req)}</span>
                 </div>
               ))}
             </div>
@@ -257,113 +257,113 @@ const Drivers = () => {
         <div className="container mx-auto px-4">
           <div className="max-w-2xl mx-auto">
             <div className="text-center mb-12">
-              <h2 className="mb-4">Join Our Fleet Today</h2>
+              <h2 className="mb-4">{t('form.title')}</h2>
               <p className="text-xl text-muted-foreground">
-                Fill out the form below and our team will contact you within 24 hours
+                {t('form.subtitle')}
               </p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6 p-8 bg-background rounded-lg border border-border">
               <div>
-                <Label htmlFor="name">Full Name *</Label>
+                <Label htmlFor="name">{t('form.name')} *</Label>
                 <Input
                   id="name"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   required
-                  placeholder="Enter your full name"
+                  placeholder={t('form.name.placeholder')}
                 />
               </div>
 
               <div>
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t('form.email')}</Label>
                 <Input
                   id="email"
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  placeholder="your.email@example.com"
+                  placeholder={t('form.email.placeholder')}
                 />
               </div>
 
               <div>
-                <Label htmlFor="phone">Phone Number *</Label>
+                <Label htmlFor="phone">{t('form.phone')} *</Label>
                 <Input
                   id="phone"
                   type="tel"
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                   required
-                  placeholder="+91 98765 43210"
+                  placeholder={t('form.phone.placeholder')}
                 />
               </div>
 
               <div>
-                <Label htmlFor="city">City *</Label>
+                <Label htmlFor="city">{t('form.city')} *</Label>
                 <Input
                   id="city"
                   value={formData.city}
                   onChange={(e) => setFormData({ ...formData, city: e.target.value })}
                   required
-                  placeholder="Mumbai, Delhi, Bangalore, etc."
+                  placeholder={t('form.city.placeholder')}
                 />
               </div>
 
               <div>
-                <Label htmlFor="vehicleType">Vehicle Type *</Label>
+                <Label htmlFor="vehicleType">{t('form.vehicle.type')} *</Label>
                 <Input
                   id="vehicleType"
                   value={formData.vehicleType}
                   onChange={(e) => setFormData({ ...formData, vehicleType: e.target.value })}
                   required
-                  placeholder="Auto-rickshaw / E-rickshaw"
+                  placeholder={t('form.vehicle.type.placeholder')}
                 />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="vehicleModel">Vehicle Model</Label>
+                  <Label htmlFor="vehicleModel">{t('form.vehicle.model')}</Label>
                   <Input
                     id="vehicleModel"
                     value={formData.vehicleModel}
                     onChange={(e) => setFormData({ ...formData, vehicleModel: e.target.value })}
-                    placeholder="e.g., Bajaj RE"
+                    placeholder={t('form.vehicle.model.placeholder')}
                   />
                 </div>
                 <div>
-                  <Label htmlFor="vehicleYear">Vehicle Year</Label>
+                  <Label htmlFor="vehicleYear">{t('form.vehicle.year')}</Label>
                   <Input
                     id="vehicleYear"
                     value={formData.vehicleYear}
                     onChange={(e) => setFormData({ ...formData, vehicleYear: e.target.value })}
-                    placeholder="e.g., 2020"
+                    placeholder={t('form.vehicle.year.placeholder')}
                   />
                 </div>
               </div>
 
               <div>
-                <Label htmlFor="licenseNumber">Driving License Number</Label>
+                <Label htmlFor="licenseNumber">{t('form.license')}</Label>
                 <Input
                   id="licenseNumber"
                   value={formData.licenseNumber}
                   onChange={(e) => setFormData({ ...formData, licenseNumber: e.target.value })}
-                  placeholder="Enter your license number"
+                  placeholder={t('form.license.placeholder')}
                 />
               </div>
 
               <div>
-                <Label htmlFor="message">Additional Information</Label>
+                <Label htmlFor="message">{t('form.additional')}</Label>
                 <Textarea
                   id="message"
                   value={formData.message}
                   onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                  placeholder="Tell us about your daily routes, operating hours, etc."
+                  placeholder={t('form.additional.placeholder')}
                   rows={4}
                 />
               </div>
 
               <div>
-                <Label htmlFor="licensePhoto">Driver's License Photo</Label>
+                <Label htmlFor="licensePhoto">{t('form.license.photo')}</Label>
                 <Input
                   id="licensePhoto"
                   type="file"
@@ -371,11 +371,11 @@ const Drivers = () => {
                   onChange={(e) => setLicensePhoto(e.target.files?.[0] || null)}
                   className="cursor-pointer"
                 />
-                <p className="text-sm text-muted-foreground mt-1">Upload a clear photo of your driver's license (max 5MB)</p>
+                <p className="text-sm text-muted-foreground mt-1">{t('form.license.photo.hint')}</p>
               </div>
 
               <div>
-                <Label htmlFor="registrationPhoto">Vehicle Registration Photo</Label>
+                <Label htmlFor="registrationPhoto">{t('form.registration.photo')}</Label>
                 <Input
                   id="registrationPhoto"
                   type="file"
@@ -383,7 +383,7 @@ const Drivers = () => {
                   onChange={(e) => setRegistrationPhoto(e.target.files?.[0] || null)}
                   className="cursor-pointer"
                 />
-                <p className="text-sm text-muted-foreground mt-1">Upload a clear photo of your vehicle registration (max 5MB)</p>
+                <p className="text-sm text-muted-foreground mt-1">{t('form.registration.photo.hint')}</p>
               </div>
 
               <Button 
@@ -391,11 +391,11 @@ const Drivers = () => {
                 className="w-full gradient-primary font-bold text-lg"
                 disabled={isSubmitting}
               >
-                {isSubmitting ? "Submitting..." : "Submit Application"}
+                {isSubmitting ? t('form.submitting') : t('form.submit')}
               </Button>
 
               <p className="text-sm text-muted-foreground text-center">
-                By submitting, you agree to our terms and conditions. We respect your privacy and will never share your information.
+                {t('form.disclaimer')}
               </p>
             </form>
           </div>
@@ -405,23 +405,23 @@ const Drivers = () => {
       {/* Testimonials */}
       <section className="py-20">
         <div className="container mx-auto px-4">
-          <h2 className="text-center mb-12">What Our Driver Partners Say</h2>
+          <h2 className="text-center mb-12">{t('testimonials.title')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             {[
               {
-                name: "Ramesh Yadav",
-                location: "Mumbai",
-                quote: "Extra ₹6,000 every month without any extra work. Best decision I made this year!",
+                name: t('testimonial1.name'),
+                location: t('testimonial1.location'),
+                quote: t('testimonial1.quote'),
               },
               {
-                name: "Suresh Kumar",
-                location: "Delhi",
-                quote: "The team is very professional. Installation was quick and payments are always on time.",
+                name: t('testimonial2.name'),
+                location: t('testimonial2.location'),
+                quote: t('testimonial2.quote'),
               },
               {
-                name: "Prakash Singh",
-                location: "Bangalore",
-                quote: "I was worried about my vehicle's paint, but they use quality materials. Highly recommend!",
+                name: t('testimonial3.name'),
+                location: t('testimonial3.location'),
+                quote: t('testimonial3.quote'),
               },
             ].map((testimonial, index) => (
               <div key={index} className="p-6 bg-card rounded-lg border border-border">
