@@ -12,6 +12,8 @@ import { supabase } from "@/integrations/supabase/client";
 const Drivers = () => {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [licensePhoto, setLicensePhoto] = useState<File | null>(null);
+  const [registrationPhoto, setRegistrationPhoto] = useState<File | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -62,6 +64,33 @@ const Drivers = () => {
     setIsSubmitting(true);
 
     try {
+      let licensePhotoUrl = null;
+      let registrationPhotoUrl = null;
+
+      // Upload license photo if provided
+      if (licensePhoto) {
+        const fileExt = licensePhoto.name.split('.').pop();
+        const fileName = `${Date.now()}_license.${fileExt}`;
+        const { data: licenseData, error: licenseError } = await supabase.storage
+          .from('driver-documents')
+          .upload(fileName, licensePhoto);
+
+        if (licenseError) throw licenseError;
+        licensePhotoUrl = licenseData.path;
+      }
+
+      // Upload registration photo if provided
+      if (registrationPhoto) {
+        const fileExt = registrationPhoto.name.split('.').pop();
+        const fileName = `${Date.now()}_registration.${fileExt}`;
+        const { data: regData, error: regError } = await supabase.storage
+          .from('driver-documents')
+          .upload(fileName, registrationPhoto);
+
+        if (regError) throw regError;
+        registrationPhotoUrl = regData.path;
+      }
+
       const { error } = await supabase
         .from('driver_applications')
         .insert([
@@ -75,6 +104,8 @@ const Drivers = () => {
             vehicle_year: formData.vehicleYear || null,
             license_number: formData.licenseNumber || null,
             additional_info: formData.message || null,
+            license_photo_url: licensePhotoUrl,
+            registration_photo_url: registrationPhotoUrl,
           }
         ]);
 
@@ -96,6 +127,8 @@ const Drivers = () => {
         licenseNumber: "",
         message: "",
       });
+      setLicensePhoto(null);
+      setRegistrationPhoto(null);
     } catch (error) {
       console.error('Error submitting application:', error);
       toast({
@@ -327,6 +360,30 @@ const Drivers = () => {
                   placeholder="Tell us about your daily routes, operating hours, etc."
                   rows={4}
                 />
+              </div>
+
+              <div>
+                <Label htmlFor="licensePhoto">Driver's License Photo</Label>
+                <Input
+                  id="licensePhoto"
+                  type="file"
+                  accept="image/*,.pdf"
+                  onChange={(e) => setLicensePhoto(e.target.files?.[0] || null)}
+                  className="cursor-pointer"
+                />
+                <p className="text-sm text-muted-foreground mt-1">Upload a clear photo of your driver's license (max 5MB)</p>
+              </div>
+
+              <div>
+                <Label htmlFor="registrationPhoto">Vehicle Registration Photo</Label>
+                <Input
+                  id="registrationPhoto"
+                  type="file"
+                  accept="image/*,.pdf"
+                  onChange={(e) => setRegistrationPhoto(e.target.files?.[0] || null)}
+                  className="cursor-pointer"
+                />
+                <p className="text-sm text-muted-foreground mt-1">Upload a clear photo of your vehicle registration (max 5MB)</p>
               </div>
 
               <Button 

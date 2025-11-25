@@ -23,8 +23,10 @@ export type Database = {
           email: string | null
           id: string
           license_number: string | null
+          license_photo_url: string | null
           name: string
           phone: string
+          registration_photo_url: string | null
           updated_at: string
           vehicle_model: string | null
           vehicle_type: string
@@ -38,8 +40,10 @@ export type Database = {
           email?: string | null
           id?: string
           license_number?: string | null
+          license_photo_url?: string | null
           name: string
           phone: string
+          registration_photo_url?: string | null
           updated_at?: string
           vehicle_model?: string | null
           vehicle_type: string
@@ -53,8 +57,10 @@ export type Database = {
           email?: string | null
           id?: string
           license_number?: string | null
+          license_photo_url?: string | null
           name?: string
           phone?: string
+          registration_photo_url?: string | null
           updated_at?: string
           vehicle_model?: string | null
           vehicle_type?: string
