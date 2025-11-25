@@ -7,14 +7,20 @@ import { Textarea } from "@/components/ui/textarea";
 import { DollarSign, Clock, Shield, Headphones, Car, TrendingUp } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const Drivers = () => {
   const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
+    email: "",
     phone: "",
     city: "",
     vehicleType: "",
+    vehicleModel: "",
+    vehicleYear: "",
+    licenseNumber: "",
     message: "",
   });
 
@@ -51,19 +57,55 @@ const Drivers = () => {
     },
   ];
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast({
-      title: "Application Received!",
-      description: "Thank you for your interest. Our team will contact you within 24 hours.",
-    });
-    setFormData({
-      name: "",
-      phone: "",
-      city: "",
-      vehicleType: "",
-      message: "",
-    });
+    setIsSubmitting(true);
+
+    try {
+      const { error } = await supabase
+        .from('driver_applications')
+        .insert([
+          {
+            name: formData.name,
+            email: formData.email || null,
+            phone: formData.phone,
+            city: formData.city,
+            vehicle_type: formData.vehicleType,
+            vehicle_model: formData.vehicleModel || null,
+            vehicle_year: formData.vehicleYear || null,
+            license_number: formData.licenseNumber || null,
+            additional_info: formData.message || null,
+          }
+        ]);
+
+      if (error) throw error;
+
+      toast({
+        title: "Application Received!",
+        description: "Thank you for your interest. Our team will contact you within 24 hours.",
+      });
+
+      setFormData({
+        name: "",
+        email: "",
+        phone: "",
+        city: "",
+        vehicleType: "",
+        vehicleModel: "",
+        vehicleYear: "",
+        licenseNumber: "",
+        message: "",
+      });
+    } catch (error) {
+      console.error('Error submitting application:', error);
+      toast({
+        title: "Submission Failed",
+        description: "There was an error submitting your application. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -201,6 +243,17 @@ const Drivers = () => {
               </div>
 
               <div>
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  placeholder="your.email@example.com"
+                />
+              </div>
+
+              <div>
                 <Label htmlFor="phone">Phone Number *</Label>
                 <Input
                   id="phone"
@@ -234,6 +287,37 @@ const Drivers = () => {
                 />
               </div>
 
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="vehicleModel">Vehicle Model</Label>
+                  <Input
+                    id="vehicleModel"
+                    value={formData.vehicleModel}
+                    onChange={(e) => setFormData({ ...formData, vehicleModel: e.target.value })}
+                    placeholder="e.g., Bajaj RE"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="vehicleYear">Vehicle Year</Label>
+                  <Input
+                    id="vehicleYear"
+                    value={formData.vehicleYear}
+                    onChange={(e) => setFormData({ ...formData, vehicleYear: e.target.value })}
+                    placeholder="e.g., 2020"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="licenseNumber">Driving License Number</Label>
+                <Input
+                  id="licenseNumber"
+                  value={formData.licenseNumber}
+                  onChange={(e) => setFormData({ ...formData, licenseNumber: e.target.value })}
+                  placeholder="Enter your license number"
+                />
+              </div>
+
               <div>
                 <Label htmlFor="message">Additional Information</Label>
                 <Textarea
@@ -245,8 +329,12 @@ const Drivers = () => {
                 />
               </div>
 
-              <Button type="submit" className="w-full gradient-primary font-bold text-lg">
-                Submit Application
+              <Button 
+                type="submit" 
+                className="w-full gradient-primary font-bold text-lg"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "Submitting..." : "Submit Application"}
               </Button>
 
               <p className="text-sm text-muted-foreground text-center">
