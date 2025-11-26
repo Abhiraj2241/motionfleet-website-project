@@ -2,6 +2,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Hero from "@/components/Hero";
 import WhyMotionFleet from "@/components/WhyMotionFleet";
+import PricingPlans from "@/components/PricingPlans";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Car, Truck, LayoutGrid, Smartphone, Star, ArrowRight } from "lucide-react";
@@ -60,11 +61,12 @@ const Home = () => {
       <Navbar />
       <Hero />
       <WhyMotionFleet />
+      <PricingPlans />
 
       {/* Fleet Models Section */}
-      <section className="py-20">
+      <section className="py-20 bg-card/50">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
+          <div className="text-center mb-16 animate-fade-in">
             <h2 className="mb-4">Fleet Advertising Models</h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               Choose the perfect advertising format for your brand's needs
@@ -75,9 +77,10 @@ const Home = () => {
             {fleetModels.map((model, index) => (
               <div
                 key={index}
-                className="p-6 bg-card rounded-lg border border-border hover:border-primary transition-all duration-300 hover-scale"
+                className="p-6 bg-background rounded-lg border border-border hover:border-primary transition-all duration-300 hover-scale hover:shadow-lg hover:shadow-primary/10 animate-fade-in"
+                style={{ animationDelay: `${index * 0.1}s` }}
               >
-                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
                   <model.icon className="text-primary" size={24} />
                 </div>
                 <h3 className="text-xl font-bold mb-2">{model.title}</h3>
@@ -90,7 +93,7 @@ const Home = () => {
       </section>
 
       {/* Analytics Section */}
-      <section className="py-20 bg-card/50">
+      <section className="py-20 bg-background">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
@@ -160,7 +163,8 @@ const Home = () => {
             {testimonials.map((testimonial, index) => (
               <div
                 key={index}
-                className="p-6 bg-card rounded-lg border border-border hover:border-primary/50 transition-all duration-300"
+                className="p-6 bg-card rounded-lg border border-border hover:border-primary/50 transition-all duration-300 hover-scale hover:shadow-lg hover:shadow-primary/10 animate-fade-in"
+                style={{ animationDelay: `${index * 0.15}s` }}
               >
                 <div className="flex mb-4">
                   {[...Array(testimonial.rating)].map((_, i) => (
@@ -180,12 +184,12 @@ const Home = () => {
 
       {/* Final CTA */}
       <section className="py-20 bg-gradient-to-r from-primary/10 to-primary/5">
-        <div className="container mx-auto px-4 text-center">
+        <div className="container mx-auto px-4 text-center animate-fade-in">
           <h2 className="mb-6">Ready to Grow Your Brand?</h2>
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
             Join hundreds of brands using MotionFleet to reach their audience where it matters most
           </p>
-          <Button size="lg" asChild className="gradient-primary font-bold text-lg">
+          <Button size="lg" asChild className="gradient-primary font-bold text-lg hover-scale">
             <Link to="/contact">
               Start Your Campaign Today
               <ArrowRight className="ml-2" size={20} />
