@@ -3,6 +3,7 @@ import Footer from "@/components/Footer";
 import Hero from "@/components/Hero";
 import WhyMotionFleet from "@/components/WhyMotionFleet";
 import PricingPlans from "@/components/PricingPlans";
+import AnalyticsDashboard from "@/components/AnalyticsDashboard";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Car, Truck, LayoutGrid, Smartphone, Star, ArrowRight } from "lucide-react";
@@ -62,6 +63,7 @@ const Home = () => {
       <Hero />
       <WhyMotionFleet />
       <PricingPlans />
+      <AnalyticsDashboard />
 
       {/* Fleet Models Section */}
       <section className="py-20 bg-card/50">
