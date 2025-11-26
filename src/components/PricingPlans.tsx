@@ -6,7 +6,7 @@ const PricingPlans = () => {
   const plans = [
     {
       name: "Starter",
-      price: "₹15,000",
+      price: "₹5,999",
       period: "/month",
       description: "Perfect for small businesses testing hyperlocal advertising",
       features: [
@@ -20,7 +20,7 @@ const PricingPlans = () => {
     },
     {
       name: "Growth",
-      price: "₹35,000",
+      price: "₹14,999",
       period: "/month",
       description: "Ideal for growing brands seeking wider reach",
       features: [
