@@ -45,16 +45,16 @@ const Hero = () => {
 
           {/* Stats */}
           <div className="grid grid-cols-3 gap-8 max-w-2xl mx-auto">
-            <div className="p-4 bg-card rounded-lg border border-border">
-              <div className="text-3xl md:text-4xl font-bold text-primary mb-1">50K+</div>
+            <div className="p-4 bg-card rounded-lg border border-border hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 hover-scale">
+              <div className="text-3xl md:text-4xl font-bold text-primary mb-1 animate-fade-in">0</div>
               <div className="text-sm text-muted-foreground">Daily Impressions</div>
             </div>
-            <div className="p-4 bg-card rounded-lg border border-border">
-              <div className="text-3xl md:text-4xl font-bold text-primary mb-1">500+</div>
+            <div className="p-4 bg-card rounded-lg border border-border hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 hover-scale">
+              <div className="text-3xl md:text-4xl font-bold text-primary mb-1 animate-fade-in">0</div>
               <div className="text-sm text-muted-foreground">Active Vehicles</div>
             </div>
-            <div className="p-4 bg-card rounded-lg border border-border">
-              <div className="text-3xl md:text-4xl font-bold text-primary mb-1">100+</div>
+            <div className="p-4 bg-card rounded-lg border border-border hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 hover-scale">
+              <div className="text-3xl md:text-4xl font-bold text-primary mb-1 animate-fade-in">0</div>
               <div className="text-sm text-muted-foreground">Happy Brands</div>
             </div>
           </div>
