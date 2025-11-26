@@ -14,6 +14,89 @@ export type Database = {
   }
   public: {
     Tables: {
+      campaign_metrics: {
+        Row: {
+          active_vehicles: number | null
+          campaign_id: string
+          coverage_area: number | null
+          created_at: string | null
+          date: string
+          estimated_impressions: number | null
+          id: string
+          total_distance: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          active_vehicles?: number | null
+          campaign_id: string
+          coverage_area?: number | null
+          created_at?: string | null
+          date: string
+          estimated_impressions?: number | null
+          id?: string
+          total_distance?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          active_vehicles?: number | null
+          campaign_id?: string
+          coverage_area?: number | null
+          created_at?: string | null
+          date?: string
+          estimated_impressions?: number | null
+          id?: string
+          total_distance?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_metrics_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      campaigns: {
+        Row: {
+          budget: number | null
+          business_name: string
+          campaign_name: string
+          created_at: string | null
+          end_date: string | null
+          id: string
+          start_date: string
+          status: string
+          target_area: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          budget?: number | null
+          business_name: string
+          campaign_name: string
+          created_at?: string | null
+          end_date?: string | null
+          id?: string
+          start_date: string
+          status?: string
+          target_area?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          budget?: number | null
+          business_name?: string
+          campaign_name?: string
+          created_at?: string | null
+          end_date?: string | null
+          id?: string
+          start_date?: string
+          status?: string
+          target_area?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       driver_applications: {
         Row: {
           additional_info: string | null
@@ -67,6 +150,94 @@ export type Database = {
           vehicle_year?: string | null
         }
         Relationships: []
+      }
+      gps_tracking: {
+        Row: {
+          accuracy: number | null
+          created_at: string | null
+          heading: number | null
+          id: string
+          latitude: number
+          longitude: number
+          speed: number | null
+          timestamp: string | null
+          vehicle_id: string
+        }
+        Insert: {
+          accuracy?: number | null
+          created_at?: string | null
+          heading?: number | null
+          id?: string
+          latitude: number
+          longitude: number
+          speed?: number | null
+          timestamp?: string | null
+          vehicle_id: string
+        }
+        Update: {
+          accuracy?: number | null
+          created_at?: string | null
+          heading?: number | null
+          id?: string
+          latitude?: number
+          longitude?: number
+          speed?: number | null
+          timestamp?: string | null
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gps_tracking_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vehicles: {
+        Row: {
+          campaign_id: string | null
+          created_at: string | null
+          driver_name: string
+          id: string
+          is_active: boolean | null
+          phone: string
+          updated_at: string | null
+          vehicle_number: string
+          vehicle_type: string
+        }
+        Insert: {
+          campaign_id?: string | null
+          created_at?: string | null
+          driver_name: string
+          id?: string
+          is_active?: boolean | null
+          phone: string
+          updated_at?: string | null
+          vehicle_number: string
+          vehicle_type: string
+        }
+        Update: {
+          campaign_id?: string | null
+          created_at?: string | null
+          driver_name?: string
+          id?: string
+          is_active?: boolean | null
+          phone?: string
+          updated_at?: string | null
+          vehicle_number?: string
+          vehicle_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicles_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

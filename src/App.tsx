@@ -11,6 +11,8 @@ import HowItWorks from "./pages/HowItWorks";
 import Portfolio from "./pages/Portfolio";
 import Drivers from "./pages/Drivers";
 import Contact from "./pages/Contact";
+import CampaignTracking from "./pages/CampaignTracking";
+import DriverTracking from "./pages/DriverTracking";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,6 +32,8 @@ const App = () => (
             <Route path="/portfolio" element={<Portfolio />} />
             <Route path="/drivers" element={<Drivers />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/tracking" element={<CampaignTracking />} />
+            <Route path="/driver-tracking" element={<DriverTracking />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
