@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { ArrowRight, Download } from "lucide-react";
+import { ArrowRight, Download, MapPin } from "lucide-react";
 
 const Hero = () => {
   return (
@@ -36,10 +36,10 @@ const Hero = () => {
               </Link>
             </Button>
             <Button size="lg" variant="outline" asChild className="border-primary/50 hover:bg-primary/10">
-              <a href="#" download>
-                <Download className="mr-2" size={20} />
-                Download Media Kit
-              </a>
+              <Link to="/tracking">
+                <MapPin className="mr-2" size={20} />
+                Track Live
+              </Link>
             </Button>
           </div>
 

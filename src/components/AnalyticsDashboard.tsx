@@ -1,5 +1,7 @@
 import { Card } from "@/components/ui/card";
-import { BarChart3, TrendingUp, Eye, MapPin } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
+import { BarChart3, TrendingUp, Eye, MapPin, ArrowRight } from "lucide-react";
 import GradientText from "./GradientText";
 
 export default function AnalyticsDashboard() {
@@ -17,9 +19,15 @@ export default function AnalyticsDashboard() {
           <GradientText className="text-4xl md:text-5xl mb-4">
             Real-Time Analytics Dashboard
           </GradientText>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+          <p className="text-muted-foreground text-lg max-w-2xl mx-auto mb-6">
             Track your campaign performance with live data and insights
           </p>
+          <Button asChild className="gradient-primary font-bold">
+            <Link to="/tracking">
+              View Live Tracking
+              <ArrowRight className="ml-2 w-5 h-5" />
+            </Link>
+          </Button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 animate-fade-in">
