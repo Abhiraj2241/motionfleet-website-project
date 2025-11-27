@@ -4,12 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { DollarSign, Clock, Shield, Headphones, Car, TrendingUp } from "lucide-react";
+import { DollarSign, Clock, Shield, Headphones, Car, TrendingUp, MapPin, Navigation } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
+import { Link } from "react-router-dom";
 
 const Drivers = () => {
   const { toast } = useToast();
@@ -156,9 +157,30 @@ const Drivers = () => {
               <LanguageSwitcher />
             </div>
             <h1 className="mb-6">{t('hero.title')}</h1>
-            <p className="text-xl text-muted-foreground">
+            <p className="text-xl text-muted-foreground mb-8">
               {t('hero.subtitle')}
             </p>
+            
+            {/* Tracking CTA */}
+            <div className="bg-gradient-to-r from-primary/10 to-primary/5 rounded-2xl p-8 mb-8 border border-primary/20">
+              <div className="flex items-center justify-center gap-3 mb-4">
+                <MapPin className="w-8 h-8 text-primary" />
+                <h3 className="text-2xl font-bold">Already Registered?</h3>
+              </div>
+              <p className="text-muted-foreground mb-6">
+                Start tracking your location to begin earning with active campaigns
+              </p>
+              <Button 
+                size="lg" 
+                asChild 
+                className="gradient-primary font-bold text-lg group"
+              >
+                <Link to="/driver-tracking">
+                  <Navigation className="mr-2 w-5 h-5" />
+                  Start Location Tracking
+                </Link>
+              </Button>
+            </div>
           </div>
         </div>
       </section>
