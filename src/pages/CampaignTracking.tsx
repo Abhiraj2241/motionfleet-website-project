@@ -3,9 +3,10 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { MapPin, Car, TrendingUp, BarChart3, Filter, Route, Flame } from "lucide-react";
+import { MapPin, Car, TrendingUp, BarChart3, Filter, Route, Flame, AlertCircle, ShieldCheck } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
@@ -22,6 +23,8 @@ export default function CampaignTracking() {
   const [viewMode, setViewMode] = useState<"markers" | "heatmap">("markers");
   const [heatmapData, setHeatmapData] = useState<any[]>([]);
   const [routeSuggestions, setRouteSuggestions] = useState<any[]>([]);
+  const [geofences, setGeofences] = useState<any[]>([]);
+  const [geofenceEvents, setGeofenceEvents] = useState<any[]>([]);
   const [metrics, setMetrics] = useState({
     activeVehicles: 0,
     totalDistance: 0,
@@ -34,7 +37,10 @@ export default function CampaignTracking() {
     loadVehicles();
     loadHeatmapData();
     generateRouteSuggestions();
+    loadGeofences();
+    loadGeofenceEvents();
     setupRealtimeSubscription();
+    setupGeofenceSubscription();
   }, []);
 
   useEffect(() => {
@@ -44,10 +50,16 @@ export default function CampaignTracking() {
   }, [mapboxToken]);
 
   useEffect(() => {
+    if (map.current && map.current.isStyleLoaded()) {
+      updateMapLayers();
+    }
+  }, [geofences, viewMode, heatmapData]);
+
+  useEffect(() => {
     if (map.current) {
       loadLatestPositions();
       if (viewMode === "heatmap") {
-        updateHeatmapLayer();
+        updateMapLayers();
       }
     }
   }, [selectedCampaign, viewMode]);
@@ -66,42 +78,9 @@ export default function CampaignTracking() {
 
     map.current.addControl(new mapboxgl.NavigationControl(), "top-right");
 
-    // Add heatmap layer once map is loaded
+    // Add layers once map is loaded
     map.current.on("load", () => {
-      if (map.current && !map.current.getSource("gps-heatmap")) {
-        map.current.addSource("gps-heatmap", {
-          type: "geojson",
-          data: {
-            type: "FeatureCollection",
-            features: [],
-          },
-        });
-
-        map.current.addLayer({
-          id: "gps-heatmap-layer",
-          type: "heatmap",
-          source: "gps-heatmap",
-          paint: {
-            "heatmap-weight": ["interpolate", ["linear"], ["get", "impressions"], 0, 0, 100, 1],
-            "heatmap-intensity": ["interpolate", ["linear"], ["zoom"], 0, 1, 12, 3],
-            "heatmap-color": [
-              "interpolate",
-              ["linear"],
-              ["heatmap-density"],
-              0, "rgba(0, 0, 255, 0)",
-              0.2, "rgb(65, 105, 225)",
-              0.4, "rgb(0, 255, 255)",
-              0.6, "rgb(0, 255, 0)",
-              0.8, "rgb(255, 255, 0)",
-              1, "rgb(255, 0, 0)",
-            ],
-            "heatmap-radius": ["interpolate", ["linear"], ["zoom"], 0, 10, 12, 30],
-            "heatmap-opacity": 0.8,
-          },
-        });
-
-        map.current.setLayoutProperty("gps-heatmap-layer", "visibility", "none");
-      }
+      updateMapLayers();
     });
   };
 
@@ -225,22 +204,148 @@ export default function CampaignTracking() {
     setHeatmapData(heatmapFeatures);
   };
 
-  const updateHeatmapLayer = () => {
-    if (!map.current || !map.current.getSource("gps-heatmap")) return;
+  const updateMapLayers = () => {
+    if (!map.current || !map.current.isStyleLoaded()) return;
 
-    const source = map.current.getSource("gps-heatmap") as mapboxgl.GeoJSONSource;
-    source.setData({
-      type: "FeatureCollection",
-      features: heatmapData,
-    });
+    // Add or update heatmap
+    if (!map.current.getSource("gps-heatmap")) {
+      map.current.addSource("gps-heatmap", {
+        type: "geojson",
+        data: {
+          type: "FeatureCollection",
+          features: heatmapData,
+        },
+      });
 
-    // Show/hide layers based on view mode
+      map.current.addLayer({
+        id: "gps-heatmap-layer",
+        type: "heatmap",
+        source: "gps-heatmap",
+        paint: {
+          "heatmap-weight": ["interpolate", ["linear"], ["get", "impressions"], 0, 0, 100, 1],
+          "heatmap-intensity": ["interpolate", ["linear"], ["zoom"], 0, 1, 12, 3],
+          "heatmap-color": [
+            "interpolate",
+            ["linear"],
+            ["heatmap-density"],
+            0, "rgba(0, 0, 255, 0)",
+            0.2, "rgb(65, 105, 225)",
+            0.4, "rgb(0, 255, 255)",
+            0.6, "rgb(0, 255, 0)",
+            0.8, "rgb(255, 255, 0)",
+            1, "rgb(255, 0, 0)",
+          ],
+          "heatmap-radius": ["interpolate", ["linear"], ["zoom"], 0, 10, 12, 30],
+          "heatmap-opacity": 0.8,
+        },
+      });
+    } else {
+      const source = map.current.getSource("gps-heatmap") as mapboxgl.GeoJSONSource;
+      source.setData({
+        type: "FeatureCollection",
+        features: heatmapData,
+      });
+    }
+
+    // Show/hide heatmap based on view mode
+    if (map.current.getLayer("gps-heatmap-layer")) {
+      map.current.setLayoutProperty("gps-heatmap-layer", "visibility", viewMode === "heatmap" ? "visible" : "none");
+    }
+
     if (viewMode === "heatmap") {
-      map.current.setLayoutProperty("gps-heatmap-layer", "visibility", "visible");
       Object.values(markers.current).forEach(marker => marker.remove());
     } else {
-      map.current.setLayoutProperty("gps-heatmap-layer", "visibility", "none");
       loadLatestPositions();
+    }
+
+    // Add or update geofence layers
+    if (geofences.length > 0) {
+      const geofenceFeatures = geofences.map(geofence => ({
+        type: "Feature" as const,
+        properties: {
+          id: geofence.id,
+          name: geofence.name,
+          radius: geofence.radius_meters,
+        },
+        geometry: {
+          type: "Point" as const,
+          coordinates: [Number(geofence.center_lng), Number(geofence.center_lat)],
+        },
+      }));
+
+      if (!map.current.getSource("geofences")) {
+        map.current.addSource("geofences", {
+          type: "geojson",
+          data: {
+            type: "FeatureCollection",
+            features: geofenceFeatures,
+          },
+        });
+
+        // Geofence fill
+        map.current.addLayer({
+          id: "geofence-fill",
+          type: "circle",
+          source: "geofences",
+          paint: {
+            "circle-radius": [
+              "interpolate",
+              ["exponential", 2],
+              ["zoom"],
+              10, ["*", 0.01, ["get", "radius"]],
+              15, ["*", 0.5, ["get", "radius"]],
+              20, ["*", 2, ["get", "radius"]]
+            ],
+            "circle-color": "#3b82f6",
+            "circle-opacity": 0.15,
+          },
+        });
+
+        // Geofence border
+        map.current.addLayer({
+          id: "geofence-border",
+          type: "circle",
+          source: "geofences",
+          paint: {
+            "circle-radius": [
+              "interpolate",
+              ["exponential", 2],
+              ["zoom"],
+              10, ["*", 0.01, ["get", "radius"]],
+              15, ["*", 0.5, ["get", "radius"]],
+              20, ["*", 2, ["get", "radius"]]
+            ],
+            "circle-color": "#3b82f6",
+            "circle-opacity": 0,
+            "circle-stroke-width": 2,
+            "circle-stroke-color": "#3b82f6",
+            "circle-stroke-opacity": 0.8,
+          },
+        });
+
+        // Geofence labels
+        map.current.addLayer({
+          id: "geofence-labels",
+          type: "symbol",
+          source: "geofences",
+          layout: {
+            "text-field": ["get", "name"],
+            "text-size": 12,
+            "text-offset": [0, -2],
+          },
+          paint: {
+            "text-color": "#1e293b",
+            "text-halo-color": "#ffffff",
+            "text-halo-width": 2,
+          },
+        });
+      } else {
+        const source = map.current.getSource("geofences") as mapboxgl.GeoJSONSource;
+        source.setData({
+          type: "FeatureCollection",
+          features: geofenceFeatures,
+        });
+      }
     }
   };
 
@@ -287,6 +392,57 @@ export default function CampaignTracking() {
     setRouteSuggestions(suggestions);
   };
 
+  const loadGeofences = async () => {
+    if (!selectedCampaign || selectedCampaign === "all") return;
+
+    const { data, error } = await supabase
+      .from("geofences")
+      .select("*")
+      .eq("campaign_id", selectedCampaign)
+      .eq("is_active", true);
+
+    if (!error && data) {
+      setGeofences(data);
+    }
+  };
+
+  const loadGeofenceEvents = async () => {
+    const query = supabase
+      .from("geofence_events")
+      .select(`
+        *,
+        vehicles!inner(vehicle_number, campaign_id),
+        geofences!inner(name)
+      `)
+      .order("timestamp", { ascending: false })
+      .limit(20);
+
+    if (selectedCampaign && selectedCampaign !== "all") {
+      query.eq("vehicles.campaign_id", selectedCampaign);
+    }
+
+    const { data, error } = await query;
+
+    if (!error && data) {
+      setGeofenceEvents(
+        data.map((event: any) => ({
+          id: event.id,
+          event_type: event.event_type,
+          timestamp: event.timestamp,
+          geofence_id: event.geofence_id,
+          vehicle_id: event.vehicle_id,
+          vehicle_number: event.vehicles?.vehicle_number,
+          geofence_name: event.geofences?.name,
+        }))
+      );
+    }
+  };
+
+  useEffect(() => {
+    loadGeofences();
+    loadGeofenceEvents();
+  }, [selectedCampaign]);
+
   const setupRealtimeSubscription = () => {
     const channel = supabase
       .channel("gps-tracking-changes")
@@ -300,6 +456,27 @@ export default function CampaignTracking() {
         (payload) => {
           console.log("New GPS position:", payload);
           loadLatestPositions();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  };
+
+  const setupGeofenceSubscription = () => {
+    const channel = supabase
+      .channel("geofence-events-changes")
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "geofence_events",
+        },
+        () => {
+          loadGeofenceEvents();
         }
       )
       .subscribe();
@@ -494,7 +671,7 @@ export default function CampaignTracking() {
         </Card>
 
         {/* Vehicle List */}
-        <Card className="p-6">
+        <Card className="p-6 mb-8">
           <h2 className="text-xl font-semibold mb-4">Active Vehicles</h2>
           <div className="space-y-3">
             {vehicles.length === 0 ? (
@@ -526,6 +703,48 @@ export default function CampaignTracking() {
                       {vehicle.campaigns?.business_name || "-"}
                     </p>
                   </div>
+                </div>
+              ))
+            )}
+          </div>
+        </Card>
+
+        {/* Zone Alerts */}
+        <Card className="p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <ShieldCheck className="w-6 h-6 text-primary" />
+            <h2 className="text-xl font-semibold">Zone Alerts</h2>
+          </div>
+          <div className="space-y-3">
+            {geofenceEvents.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-8">
+                No recent zone activity
+              </p>
+            ) : (
+              geofenceEvents.slice(0, 10).map((event) => (
+                <div
+                  key={event.id}
+                  className="flex items-start justify-between p-4 rounded-lg bg-muted/30 border border-border"
+                >
+                  <div className="flex items-start gap-3">
+                    <div className={`mt-0.5 ${event.event_type === 'enter' ? 'text-green-500' : 'text-orange-500'}`}>
+                      <AlertCircle className="h-5 w-5" />
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium">
+                        Vehicle {event.vehicle_number || event.vehicle_id.slice(0, 8)}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {event.event_type === 'enter' ? 'Entered' : 'Exited'} {event.geofence_name}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(event.timestamp).toLocaleString()}
+                      </p>
+                    </div>
+                  </div>
+                  <Badge variant={event.event_type === 'enter' ? 'default' : 'secondary'}>
+                    {event.event_type}
+                  </Badge>
                 </div>
               ))
             )}

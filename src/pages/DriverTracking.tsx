@@ -99,6 +99,19 @@ export default function DriverTracking() {
 
         if (error) {
           console.error("Error saving location:", error);
+        } else {
+          // Check geofences after saving location
+          try {
+            await supabase.functions.invoke('check-geofences', {
+              body: {
+                vehicleId: currentVehicleId,
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude,
+              },
+            });
+          } catch (geofenceError) {
+            console.error("Error checking geofences:", geofenceError);
+          }
         }
       },
       (error) => {

@@ -151,6 +151,104 @@ export type Database = {
         }
         Relationships: []
       }
+      geofence_events: {
+        Row: {
+          created_at: string | null
+          event_type: string
+          geofence_id: string
+          id: string
+          latitude: number
+          longitude: number
+          timestamp: string | null
+          vehicle_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          event_type: string
+          geofence_id: string
+          id?: string
+          latitude: number
+          longitude: number
+          timestamp?: string | null
+          vehicle_id: string
+        }
+        Update: {
+          created_at?: string | null
+          event_type?: string
+          geofence_id?: string
+          id?: string
+          latitude?: number
+          longitude?: number
+          timestamp?: string | null
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "geofence_events_geofence_id_fkey"
+            columns: ["geofence_id"]
+            isOneToOne: false
+            referencedRelation: "geofences"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "geofence_events_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      geofences: {
+        Row: {
+          campaign_id: string
+          center_lat: number
+          center_lng: number
+          created_at: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          min_impressions_threshold: number | null
+          name: string
+          radius_meters: number
+          updated_at: string | null
+        }
+        Insert: {
+          campaign_id: string
+          center_lat: number
+          center_lng: number
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          min_impressions_threshold?: number | null
+          name: string
+          radius_meters?: number
+          updated_at?: string | null
+        }
+        Update: {
+          campaign_id?: string
+          center_lat?: number
+          center_lng?: number
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          min_impressions_threshold?: number | null
+          name?: string
+          radius_meters?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "geofences_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       gps_tracking: {
         Row: {
           accuracy: number | null
