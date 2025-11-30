@@ -5,7 +5,8 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { MapPin, Car, TrendingUp, BarChart3, Filter } from "lucide-react";
+import { MapPin, Car, TrendingUp, BarChart3, Filter, Route, Flame } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 
@@ -18,6 +19,9 @@ export default function CampaignTracking() {
   const [campaigns, setCampaigns] = useState<any[]>([]);
   const [vehicles, setVehicles] = useState<any[]>([]);
   const [selectedCampaign, setSelectedCampaign] = useState<string>("all");
+  const [viewMode, setViewMode] = useState<"markers" | "heatmap">("markers");
+  const [heatmapData, setHeatmapData] = useState<any[]>([]);
+  const [routeSuggestions, setRouteSuggestions] = useState<any[]>([]);
   const [metrics, setMetrics] = useState({
     activeVehicles: 0,
     totalDistance: 0,
@@ -28,6 +32,8 @@ export default function CampaignTracking() {
   useEffect(() => {
     loadCampaigns();
     loadVehicles();
+    loadHeatmapData();
+    generateRouteSuggestions();
     setupRealtimeSubscription();
   }, []);
 
@@ -40,8 +46,11 @@ export default function CampaignTracking() {
   useEffect(() => {
     if (map.current) {
       loadLatestPositions();
+      if (viewMode === "heatmap") {
+        updateHeatmapLayer();
+      }
     }
-  }, [selectedCampaign]);
+  }, [selectedCampaign, viewMode]);
 
   const initializeMap = () => {
     if (!mapContainer.current || !mapboxToken) return;
@@ -56,6 +65,44 @@ export default function CampaignTracking() {
     });
 
     map.current.addControl(new mapboxgl.NavigationControl(), "top-right");
+
+    // Add heatmap layer once map is loaded
+    map.current.on("load", () => {
+      if (map.current && !map.current.getSource("gps-heatmap")) {
+        map.current.addSource("gps-heatmap", {
+          type: "geojson",
+          data: {
+            type: "FeatureCollection",
+            features: [],
+          },
+        });
+
+        map.current.addLayer({
+          id: "gps-heatmap-layer",
+          type: "heatmap",
+          source: "gps-heatmap",
+          paint: {
+            "heatmap-weight": ["interpolate", ["linear"], ["get", "impressions"], 0, 0, 100, 1],
+            "heatmap-intensity": ["interpolate", ["linear"], ["zoom"], 0, 1, 12, 3],
+            "heatmap-color": [
+              "interpolate",
+              ["linear"],
+              ["heatmap-density"],
+              0, "rgba(0, 0, 255, 0)",
+              0.2, "rgb(65, 105, 225)",
+              0.4, "rgb(0, 255, 255)",
+              0.6, "rgb(0, 255, 0)",
+              0.8, "rgb(255, 255, 0)",
+              1, "rgb(255, 0, 0)",
+            ],
+            "heatmap-radius": ["interpolate", ["linear"], ["zoom"], 0, 10, 12, 30],
+            "heatmap-opacity": 0.8,
+          },
+        });
+
+        map.current.setLayoutProperty("gps-heatmap-layer", "visibility", "none");
+      }
+    });
   };
 
   const loadCampaigns = async () => {
@@ -144,6 +191,102 @@ export default function CampaignTracking() {
     });
   };
 
+  const loadHeatmapData = async () => {
+    const { data: positions, error } = await supabase
+      .from("gps_tracking")
+      .select("latitude, longitude, vehicle_id");
+
+    if (error) {
+      console.error("Error loading heatmap data:", error);
+      return;
+    }
+
+    // Calculate impression estimates based on GPS density
+    const densityMap = new Map();
+    positions?.forEach(pos => {
+      const key = `${pos.latitude.toFixed(4)},${pos.longitude.toFixed(4)}`;
+      densityMap.set(key, (densityMap.get(key) || 0) + 1);
+    });
+
+    const heatmapFeatures = Array.from(densityMap.entries()).map(([key, count]) => {
+      const [lat, lng] = key.split(",").map(Number);
+      return {
+        type: "Feature",
+        properties: {
+          impressions: count * 50, // Estimate 50 impressions per GPS point
+        },
+        geometry: {
+          type: "Point",
+          coordinates: [lng, lat],
+        },
+      };
+    });
+
+    setHeatmapData(heatmapFeatures);
+  };
+
+  const updateHeatmapLayer = () => {
+    if (!map.current || !map.current.getSource("gps-heatmap")) return;
+
+    const source = map.current.getSource("gps-heatmap") as mapboxgl.GeoJSONSource;
+    source.setData({
+      type: "FeatureCollection",
+      features: heatmapData,
+    });
+
+    // Show/hide layers based on view mode
+    if (viewMode === "heatmap") {
+      map.current.setLayoutProperty("gps-heatmap-layer", "visibility", "visible");
+      Object.values(markers.current).forEach(marker => marker.remove());
+    } else {
+      map.current.setLayoutProperty("gps-heatmap-layer", "visibility", "none");
+      loadLatestPositions();
+    }
+  };
+
+  const generateRouteSuggestions = async () => {
+    const { data: positions, error } = await supabase
+      .from("gps_tracking")
+      .select("latitude, longitude, speed, timestamp");
+
+    if (error) {
+      console.error("Error generating route suggestions:", error);
+      return;
+    }
+
+    // Analyze GPS data to find high-traffic zones
+    const zones = new Map();
+    positions?.forEach(pos => {
+      const zone = `${Math.floor(pos.latitude * 20)},${Math.floor(pos.longitude * 20)}`;
+      if (!zones.has(zone)) {
+        zones.set(zone, { count: 0, avgSpeed: 0, coords: [pos.latitude, pos.longitude] });
+      }
+      const zoneData = zones.get(zone);
+      zoneData.count++;
+      zoneData.avgSpeed += pos.speed || 0;
+    });
+
+    // Generate suggestions based on high-traffic zones
+    const suggestions = Array.from(zones.entries())
+      .map(([zone, data]) => ({
+        zone,
+        impressions: data.count * 50,
+        avgSpeed: data.avgSpeed / data.count,
+        coords: data.coords,
+      }))
+      .sort((a, b) => b.impressions - a.impressions)
+      .slice(0, 5)
+      .map((zone, idx) => ({
+        title: `High-Impact Zone ${idx + 1}`,
+        description: `Est. ${zone.impressions.toLocaleString()} impressions/day`,
+        details: `Avg speed: ${zone.avgSpeed.toFixed(1)} km/h - Optimal for visibility`,
+        priority: idx < 2 ? "high" : "medium",
+        coords: zone.coords,
+      }));
+
+    setRouteSuggestions(suggestions);
+  };
+
   const setupRealtimeSubscription = () => {
     const channel = supabase
       .channel("gps-tracking-changes")
@@ -218,6 +361,18 @@ export default function CampaignTracking() {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-semibold">Live Vehicle Tracking</h2>
             <div className="flex gap-2">
+              <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as "markers" | "heatmap")}>
+                <TabsList>
+                  <TabsTrigger value="markers">
+                    <MapPin className="w-4 h-4 mr-2" />
+                    Vehicles
+                  </TabsTrigger>
+                  <TabsTrigger value="heatmap">
+                    <Flame className="w-4 h-4 mr-2" />
+                    Heatmap
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
               <select
                 value={selectedCampaign}
                 onChange={(e) => setSelectedCampaign(e.target.value)}
@@ -272,6 +427,70 @@ export default function CampaignTracking() {
               className="w-full h-[600px] rounded-lg"
             />
           )}
+        </Card>
+
+        {/* Route Optimization Suggestions */}
+        <Card className="p-6 mb-8">
+          <div className="flex items-center gap-2 mb-4">
+            <Route className="w-6 h-6 text-primary" />
+            <h2 className="text-xl font-semibold">Route Optimization Insights</h2>
+          </div>
+          <p className="text-sm text-muted-foreground mb-6">
+            Based on GPS data analysis, these zones show highest impression potential
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {routeSuggestions.length === 0 ? (
+              <div className="col-span-full text-center py-8 text-muted-foreground">
+                Analyzing GPS data to generate route suggestions...
+              </div>
+            ) : (
+              routeSuggestions.map((suggestion, idx) => (
+                <Card
+                  key={idx}
+                  className={`p-4 border-l-4 ${
+                    suggestion.priority === "high"
+                      ? "border-l-red-500 bg-red-50/10"
+                      : "border-l-yellow-500 bg-yellow-50/10"
+                  }`}
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <h3 className="font-semibold">{suggestion.title}</h3>
+                    <span
+                      className={`text-xs px-2 py-1 rounded-full ${
+                        suggestion.priority === "high"
+                          ? "bg-red-500/20 text-red-700"
+                          : "bg-yellow-500/20 text-yellow-700"
+                      }`}
+                    >
+                      {suggestion.priority}
+                    </span>
+                  </div>
+                  <p className="text-sm font-medium text-primary mb-1">
+                    {suggestion.description}
+                  </p>
+                  <p className="text-xs text-muted-foreground mb-3">
+                    {suggestion.details}
+                  </p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
+                    onClick={() => {
+                      if (map.current) {
+                        map.current.flyTo({
+                          center: [suggestion.coords[1], suggestion.coords[0]],
+                          zoom: 14,
+                        });
+                        toast.success("Navigated to zone on map");
+                      }
+                    }}
+                  >
+                    View on Map
+                  </Button>
+                </Card>
+              ))
+            )}
+          </div>
         </Card>
 
         {/* Vehicle List */}
