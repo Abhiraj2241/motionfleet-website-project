@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { MapPin, Car, TrendingUp, BarChart3, Filter, Route, Flame, AlertCircle, ShieldCheck } from "lucide-react";
+import { MapPin, Car, TrendingUp, BarChart3, Filter, Route, Flame, AlertCircle, ShieldCheck, Sparkles, Target } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
@@ -25,6 +25,8 @@ export default function CampaignTracking() {
   const [routeSuggestions, setRouteSuggestions] = useState<any[]>([]);
   const [geofences, setGeofences] = useState<any[]>([]);
   const [geofenceEvents, setGeofenceEvents] = useState<any[]>([]);
+  const [optimizationSuggestions, setOptimizationSuggestions] = useState<any[]>([]);
+  const [isOptimizing, setIsOptimizing] = useState(false);
   const [metrics, setMetrics] = useState({
     activeVehicles: 0,
     totalDistance: 0,
@@ -438,6 +440,153 @@ export default function CampaignTracking() {
     }
   };
 
+  const runOptimization = async () => {
+    if (selectedCampaign === "all") {
+      toast.error("Please select a specific campaign to optimize");
+      return;
+    }
+
+    setIsOptimizing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("optimize-geofences", {
+        body: {
+          campaign_id: selectedCampaign,
+          days_back: 30,
+        },
+      });
+
+      if (error) throw error;
+
+      if (data.suggestions && data.suggestions.length > 0) {
+        setOptimizationSuggestions(data.suggestions);
+        toast.success(`Found ${data.suggestions.length} optimization opportunities!`);
+        
+        // Visualize suggestions on map
+        if (map.current) {
+          data.suggestions.forEach((suggestion: any, idx: number) => {
+            const el = document.createElement("div");
+            el.className = "optimization-marker";
+            el.innerHTML = `
+              <div style="
+                background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+                border: 3px solid white;
+                border-radius: 50%;
+                width: 40px;
+                height: 40px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-weight: bold;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                cursor: pointer;
+              ">
+                ${idx + 1}
+              </div>
+            `;
+
+            new mapboxgl.Marker(el)
+              .setLngLat([suggestion.center_lng, suggestion.center_lat])
+              .setPopup(
+                new mapboxgl.Popup({ offset: 25 }).setHTML(
+                  `<div class="p-3">
+                    <h3 class="font-semibold text-lg mb-2">${suggestion.name}</h3>
+                    <div class="space-y-1 text-sm">
+                      <p><strong>Est. Impressions:</strong> ${suggestion.estimated_impressions.toLocaleString()}</p>
+                      <p><strong>Confidence:</strong> ${suggestion.confidence}%</p>
+                      <p><strong>Data Points:</strong> ${suggestion.data_points}</p>
+                      <p><strong>Avg Speed:</strong> ${suggestion.avg_speed} km/h</p>
+                    </div>
+                  </div>`
+                )
+              )
+              .addTo(map.current!);
+
+            // Draw circle for suggested radius
+            if (map.current!.getSource(`optimization-${idx}`)) {
+              (map.current!.getSource(`optimization-${idx}`) as mapboxgl.GeoJSONSource).setData({
+                type: "Feature",
+                geometry: {
+                  type: "Point",
+                  coordinates: [suggestion.center_lng, suggestion.center_lat],
+                },
+                properties: {},
+              });
+            } else {
+              map.current!.addSource(`optimization-${idx}`, {
+                type: "geojson",
+                data: {
+                  type: "Feature",
+                  geometry: {
+                    type: "Point",
+                    coordinates: [suggestion.center_lng, suggestion.center_lat],
+                  },
+                  properties: {},
+                },
+              });
+
+              map.current!.addLayer({
+                id: `optimization-circle-${idx}`,
+                type: "circle",
+                source: `optimization-${idx}`,
+                paint: {
+                  "circle-radius": [
+                    "interpolate",
+                    ["linear"],
+                    ["zoom"],
+                    10, suggestion.radius_meters / 500,
+                    15, suggestion.radius_meters / 50,
+                  ],
+                  "circle-color": "#fbbf24",
+                  "circle-opacity": 0.2,
+                  "circle-stroke-width": 2,
+                  "circle-stroke-color": "#f59e0b",
+                  "circle-stroke-opacity": 0.8,
+                },
+              });
+            }
+          });
+        }
+      } else {
+        toast.info(data.message || "No optimization opportunities found at this time");
+        setOptimizationSuggestions([]);
+      }
+    } catch (error) {
+      console.error("Optimization error:", error);
+      toast.error("Failed to generate optimization suggestions");
+    } finally {
+      setIsOptimizing(false);
+    }
+  };
+
+  const createGeofenceFromSuggestion = async (suggestion: any) => {
+    try {
+      const { error } = await supabase.from("geofences").insert({
+        campaign_id: selectedCampaign,
+        name: suggestion.name,
+        description: `Auto-optimized zone with ${suggestion.estimated_impressions.toLocaleString()} estimated impressions`,
+        center_lat: suggestion.center_lat,
+        center_lng: suggestion.center_lng,
+        radius_meters: suggestion.radius_meters,
+        min_impressions_threshold: Math.round(suggestion.estimated_impressions * 0.8),
+        is_active: true,
+      });
+
+      if (error) throw error;
+
+      toast.success(`Created geofence: ${suggestion.name}`);
+      loadGeofences();
+      
+      // Remove suggestion from list
+      setOptimizationSuggestions(prev => 
+        prev.filter(s => s.center_lat !== suggestion.center_lat || s.center_lng !== suggestion.center_lng)
+      );
+    } catch (error) {
+      console.error("Error creating geofence:", error);
+      toast.error("Failed to create geofence");
+    }
+  };
+
   useEffect(() => {
     loadGeofences();
     loadGeofenceEvents();
@@ -606,7 +755,116 @@ export default function CampaignTracking() {
           )}
         </Card>
 
-        {/* Route Optimization Suggestions */}
+        {/* AI-Powered Campaign Optimization */}
+        <Card className="p-6 mb-8 bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-6 h-6 text-primary" />
+              <h2 className="text-xl font-semibold">AI Campaign Optimization</h2>
+            </div>
+            <Button
+              onClick={runOptimization}
+              disabled={isOptimizing || selectedCampaign === "all"}
+              className="gap-2"
+            >
+              {isOptimizing ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Analyzing...
+                </>
+              ) : (
+                <>
+                  <Target className="w-4 h-4" />
+                  Generate Suggestions
+                </>
+              )}
+            </Button>
+          </div>
+          <p className="text-sm text-muted-foreground mb-6">
+            AI analyzes historical GPS data and impression patterns to suggest optimal geofence zones for maximum campaign impact
+          </p>
+          
+          {selectedCampaign === "all" && (
+            <div className="text-center py-8 px-4 bg-background/50 rounded-lg border border-border">
+              <p className="text-muted-foreground">
+                Select a specific campaign to generate optimization suggestions
+              </p>
+            </div>
+          )}
+
+          {optimizationSuggestions.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {optimizationSuggestions.map((suggestion, idx) => (
+                <Card
+                  key={idx}
+                  className="p-4 border-2 border-primary/30 bg-background hover:border-primary transition-colors"
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm">
+                        {idx + 1}
+                      </div>
+                      <h3 className="font-semibold">{suggestion.name}</h3>
+                    </div>
+                    <Badge variant="secondary" className="bg-primary/20">
+                      {suggestion.confidence}% confident
+                    </Badge>
+                  </div>
+                  
+                  <div className="space-y-2 mb-4 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Est. Impressions:</span>
+                      <span className="font-semibold text-primary">
+                        {suggestion.estimated_impressions.toLocaleString()}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Radius:</span>
+                      <span className="font-medium">{suggestion.radius_meters}m</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Avg Speed:</span>
+                      <span className="font-medium">{suggestion.avg_speed} km/h</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Data Points:</span>
+                      <span className="font-medium">{suggestion.data_points}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1"
+                      onClick={() => {
+                        if (map.current) {
+                          map.current.flyTo({
+                            center: [suggestion.center_lng, suggestion.center_lat],
+                            zoom: 15,
+                          });
+                          toast.success("Viewing zone on map");
+                        }
+                      }}
+                    >
+                      View
+                    </Button>
+                    <Button
+                      size="sm"
+                      className="flex-1 gap-1"
+                      onClick={() => createGeofenceFromSuggestion(suggestion)}
+                    >
+                      <Target className="w-3 h-3" />
+                      Create Zone
+                    </Button>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
+        </Card>
+
+        {/* Route Optimization Insights */}
         <Card className="p-6 mb-8">
           <div className="flex items-center gap-2 mb-4">
             <Route className="w-6 h-6 text-primary" />

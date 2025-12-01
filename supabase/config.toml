@@ -1,1 +1,7 @@
 project_id = "abrvlbkridfthygzbzln"
+
+[functions.check-geofences]
+verify_jwt = false
+
+[functions.optimize-geofences]
+verify_jwt = false
