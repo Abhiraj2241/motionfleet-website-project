@@ -133,7 +133,7 @@ const Home = () => {
                 </li>
               </ul>
               <Button asChild className="gradient-primary font-bold">
-                <Link to="/contact">
+                <Link to="/book-campaign">
                   Request Demo
                   <ArrowRight className="ml-2" size={20} />
                 </Link>
@@ -192,7 +192,7 @@ const Home = () => {
             Join hundreds of brands using MotionFleet to reach their audience where it matters most
           </p>
           <Button size="lg" asChild className="gradient-primary font-bold text-lg hover-scale">
-            <Link to="/contact">
+            <Link to="/book-campaign">
               Start Your Campaign Today
               <ArrowRight className="ml-2" size={20} />
             </Link>

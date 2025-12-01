@@ -62,7 +62,7 @@ const Navbar = () => {
               <Link to="/contact">Get Started</Link>
             </Button>
             <Button asChild className="gradient-primary font-bold">
-              <Link to="/contact">Book Campaign</Link>
+              <Link to="/book-campaign">Book Campaign</Link>
             </Button>
           </div>
 
@@ -92,7 +92,7 @@ const Navbar = () => {
                 </Link>
               ))}
               <Button asChild className="gradient-primary font-bold w-full">
-                <Link to="/contact" onClick={() => setIsMobileMenuOpen(false)}>
+                <Link to="/book-campaign" onClick={() => setIsMobileMenuOpen(false)}>
                   Book Campaign
                 </Link>
               </Button>
