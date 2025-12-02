@@ -7,8 +7,6 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import Home from "./pages/Home";
 import About from "./pages/About";
 import Services from "./pages/Services";
-import HowItWorks from "./pages/HowItWorks";
-import Portfolio from "./pages/Portfolio";
 import Drivers from "./pages/Drivers";
 import Contact from "./pages/Contact";
 import CampaignTracking from "./pages/CampaignTracking";
@@ -29,8 +27,6 @@ const App = () => (
             <Route path="/" element={<Home />} />
             <Route path="/about" element={<About />} />
             <Route path="/services" element={<Services />} />
-            <Route path="/how-it-works" element={<HowItWorks />} />
-            <Route path="/portfolio" element={<Portfolio />} />
             <Route path="/drivers" element={<Drivers />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/book-campaign" element={<BookCampaign />} />
