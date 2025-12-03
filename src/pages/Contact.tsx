@@ -15,7 +15,8 @@ import {
   Headphones,
   Building2,
   Navigation,
-  ChevronRight
+  ChevronRight,
+  Loader2
 } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -25,9 +26,11 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { supabase } from "@/integrations/supabase/client";
 
 const Contact = () => {
   const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -36,19 +39,68 @@ const Contact = () => {
     message: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast({
-      title: "Message Sent!",
-      description: "Thank you for reaching out. We'll get back to you within 24 hours.",
-    });
-    setFormData({
-      name: "",
-      email: "",
-      phone: "",
-      company: "",
-      message: "",
-    });
+    setIsSubmitting(true);
+
+    try {
+      // Save to database
+      const { error: dbError } = await supabase
+        .from("contact_inquiries")
+        .insert({
+          name: formData.name.trim(),
+          email: formData.email.trim(),
+          phone: formData.phone.trim() || null,
+          company: formData.company.trim() || null,
+          message: formData.message.trim(),
+        });
+
+      if (dbError) {
+        console.error("Database error:", dbError);
+        throw new Error("Failed to save your inquiry");
+      }
+
+      // Send email notification
+      const { error: emailError } = await supabase.functions.invoke(
+        "send-contact-notification",
+        {
+          body: {
+            name: formData.name.trim(),
+            email: formData.email.trim(),
+            phone: formData.phone.trim() || undefined,
+            company: formData.company.trim() || undefined,
+            message: formData.message.trim(),
+          },
+        }
+      );
+
+      if (emailError) {
+        console.error("Email error:", emailError);
+        // Don't throw - form was saved, email is secondary
+      }
+
+      toast({
+        title: "Message Sent!",
+        description: "Thank you for reaching out. We'll get back to you within 24 hours.",
+      });
+
+      setFormData({
+        name: "",
+        email: "",
+        phone: "",
+        company: "",
+        message: "",
+      });
+    } catch (error: any) {
+      console.error("Submit error:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to send message. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const contactMethods = [
@@ -277,9 +329,22 @@ const Contact = () => {
                   />
                 </div>
 
-                <Button type="submit" className="w-full gradient-primary font-bold text-lg py-6 rounded-xl hover:scale-[1.02] transition-transform">
-                  Send Message
-                  <ChevronRight className="ml-2" size={20} />
+                <Button 
+                  type="submit" 
+                  disabled={isSubmitting}
+                  className="w-full gradient-primary font-bold text-lg py-6 rounded-xl hover:scale-[1.02] transition-transform disabled:opacity-70 disabled:cursor-not-allowed"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 animate-spin" size={20} />
+                      Sending...
+                    </>
+                  ) : (
+                    <>
+                      Send Message
+                      <ChevronRight className="ml-2" size={20} />
+                    </>
+                  )}
                 </Button>
               </form>
             </div>
