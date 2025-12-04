@@ -23,15 +23,21 @@ import {
   ChevronRight,
   Loader2,
   CheckCircle2,
-  Building2
+  Building2,
+  Upload,
+  FileText,
+  X
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
 const Careers = () => {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [resumeFile, setResumeFile] = useState<File | null>(null);
+  const [isUploadingResume, setIsUploadingResume] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -41,11 +47,81 @@ const Careers = () => {
     coverLetter: "",
   });
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file type
+      const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+      if (!allowedTypes.includes(file.type)) {
+        toast({
+          title: "Invalid file type",
+          description: "Please upload a PDF or Word document.",
+          variant: "destructive",
+        });
+        return;
+      }
+      // Validate file size (5MB max)
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: "File too large",
+          description: "Please upload a file smaller than 5MB.",
+          variant: "destructive",
+        });
+        return;
+      }
+      setResumeFile(file);
+    }
+  };
+
+  const removeResume = () => {
+    setResumeFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const uploadResume = async (): Promise<string | null> => {
+    if (!resumeFile) return null;
+    
+    setIsUploadingResume(true);
+    try {
+      const fileExt = resumeFile.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const filePath = `applications/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('resumes')
+        .upload(filePath, resumeFile);
+
+      if (uploadError) {
+        console.error("Upload error:", uploadError);
+        throw uploadError;
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('resumes')
+        .getPublicUrl(filePath);
+
+      return publicUrl;
+    } catch (error) {
+      console.error("Resume upload failed:", error);
+      throw error;
+    } finally {
+      setIsUploadingResume(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     try {
+      // Upload resume if provided
+      let resumeUrl: string | null = null;
+      if (resumeFile) {
+        resumeUrl = await uploadResume();
+      }
+
       // Save to database
       const { error: dbError } = await supabase
         .from("job_applications")
@@ -56,6 +132,7 @@ const Careers = () => {
           position: formData.position,
           experience: formData.experience || null,
           cover_letter: formData.coverLetter.trim() || null,
+          resume_url: resumeUrl,
         });
 
       if (dbError) {
@@ -74,6 +151,7 @@ const Careers = () => {
             position: formData.position,
             experience: formData.experience || undefined,
             coverLetter: formData.coverLetter.trim() || undefined,
+            resumeUrl: resumeUrl || undefined,
           },
         }
       );
@@ -95,6 +173,10 @@ const Careers = () => {
         experience: "",
         coverLetter: "",
       });
+      setResumeFile(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
     } catch (error: any) {
       console.error("Submit error:", error);
       toast({
@@ -358,6 +440,42 @@ const Careers = () => {
               </div>
 
               <div>
+                <Label htmlFor="resume">Resume / CV</Label>
+                <div className="mt-2">
+                  {resumeFile ? (
+                    <div className="flex items-center gap-3 p-3 bg-primary/10 border border-primary/20 rounded-lg">
+                      <FileText className="text-primary" size={20} />
+                      <span className="flex-1 text-sm truncate">{resumeFile.name}</span>
+                      <button
+                        type="button"
+                        onClick={removeResume}
+                        className="p-1 hover:bg-primary/20 rounded-full transition-colors"
+                      >
+                        <X size={16} className="text-muted-foreground" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div
+                      onClick={() => fileInputRef.current?.click()}
+                      className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-border rounded-lg cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-colors"
+                    >
+                      <Upload className="text-muted-foreground mb-2" size={24} />
+                      <span className="text-sm text-muted-foreground">Click to upload resume</span>
+                      <span className="text-xs text-muted-foreground mt-1">PDF or Word (max 5MB)</span>
+                    </div>
+                  )}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    id="resume"
+                    accept=".pdf,.doc,.docx"
+                    onChange={handleFileChange}
+                    className="hidden"
+                  />
+                </div>
+              </div>
+
+              <div>
                 <Label htmlFor="coverLetter">Cover Letter / Why do you want to join MotionFleet?</Label>
                 <Textarea
                   id="coverLetter"
@@ -371,13 +489,13 @@ const Careers = () => {
 
               <Button 
                 type="submit" 
-                disabled={isSubmitting || !formData.position}
+                disabled={isSubmitting || isUploadingResume || !formData.position}
                 className="w-full gradient-primary font-bold text-lg py-6 rounded-xl hover:scale-[1.02] transition-transform disabled:opacity-70 disabled:cursor-not-allowed"
               >
-                {isSubmitting ? (
+                {isSubmitting || isUploadingResume ? (
                   <>
                     <Loader2 className="mr-2 animate-spin" size={20} />
-                    Submitting...
+                    {isUploadingResume ? "Uploading Resume..." : "Submitting..."}
                   </>
                 ) : (
                   <>
