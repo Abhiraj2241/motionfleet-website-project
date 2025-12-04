@@ -8,8 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { 
@@ -37,8 +36,8 @@ const BookCampaign = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(1);
-  const [startDate, setStartDate] = useState<Date>();
-  const [endDate, setEndDate] = useState<Date>();
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -84,7 +83,7 @@ const BookCampaign = () => {
   const steps = [
     { number: 1, title: "Campaign Details", icon: Rocket },
     { number: 2, title: "Target & Budget", icon: Target },
-    { number: 3, title: "Schedule & Launch", icon: Calendar },
+    { number: 3, title: "Schedule & Launch", icon: CalendarIcon },
   ];
 
   const handleInputChange = (field: string, value: string) => {
@@ -117,8 +116,8 @@ const BookCampaign = () => {
         business_name: formData.businessName,
         target_area: formData.targetArea,
         budget: parseFloat(formData.budget) || null,
-        start_date: format(startDate, "yyyy-MM-dd"),
-        end_date: format(endDate, "yyyy-MM-dd"),
+        start_date: startDate,
+        end_date: endDate,
         status: "pending",
       });
 
@@ -135,8 +134,8 @@ const BookCampaign = () => {
             budget: formData.budget,
             vehicleType: formData.vehicleType,
             description: formData.description || undefined,
-            startDate: format(startDate, "PPP"),
-            endDate: format(endDate, "PPP"),
+            startDate: format(new Date(startDate), "PPP"),
+            endDate: format(new Date(endDate), "PPP"),
           },
         }
       );
@@ -413,63 +412,32 @@ const BookCampaign = () => {
                   <div className="space-y-6 animate-fade-in">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-2">
-                        <Label className="flex items-center gap-2">
+                        <Label htmlFor="startDate" className="flex items-center gap-2">
                           <Clock className="w-4 h-4 text-primary" />
                           Start Date *
                         </Label>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button
-                              variant="outline"
-                              className={cn(
-                                "w-full justify-start text-left font-normal transition-all duration-200 hover:scale-[1.02]",
-                                !startDate && "text-muted-foreground"
-                              )}
-                            >
-                              <CalendarIcon className="mr-2 h-4 w-4" />
-                              {startDate ? format(startDate, "PPP") : "Pick a date"}
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0 z-50" align="start">
-                            <Calendar 
-                              mode="single" 
-                              selected={startDate} 
-                              onSelect={setStartDate} 
-                              initialFocus 
-                              className="pointer-events-auto"
-                            />
-                          </PopoverContent>
-                        </Popover>
+                        <Input
+                          id="startDate"
+                          type="date"
+                          value={startDate}
+                          onChange={(e) => setStartDate(e.target.value)}
+                          className="transition-all duration-200 focus:scale-[1.02]"
+                        />
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="flex items-center gap-2">
+                        <Label htmlFor="endDate" className="flex items-center gap-2">
                           <Clock className="w-4 h-4 text-primary" />
                           End Date *
                         </Label>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button
-                              variant="outline"
-                              className={cn(
-                                "w-full justify-start text-left font-normal transition-all duration-200 hover:scale-[1.02]",
-                                !endDate && "text-muted-foreground"
-                              )}
-                            >
-                              <CalendarIcon className="mr-2 h-4 w-4" />
-                              {endDate ? format(endDate, "PPP") : "Pick a date"}
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0 z-50" align="start">
-                            <Calendar 
-                              mode="single" 
-                              selected={endDate} 
-                              onSelect={setEndDate} 
-                              initialFocus 
-                              className="pointer-events-auto"
-                            />
-                          </PopoverContent>
-                        </Popover>
+                        <Input
+                          id="endDate"
+                          type="date"
+                          value={endDate}
+                          onChange={(e) => setEndDate(e.target.value)}
+                          min={startDate}
+                          className="transition-all duration-200 focus:scale-[1.02]"
+                        />
                       </div>
                     </div>
 
@@ -491,7 +459,7 @@ const BookCampaign = () => {
                               <p className="text-xs text-muted-foreground mb-1">Campaign Duration</p>
                               <p className="font-semibold">
                                 {startDate && endDate
-                                  ? `${Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))} days`
+                                  ? `${Math.ceil((new Date(endDate).getTime() - new Date(startDate).getTime()) / (1000 * 60 * 60 * 24))} days`
                                   : "Not set"}
                               </p>
                             </div>
