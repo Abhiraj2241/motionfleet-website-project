@@ -124,6 +124,27 @@ const BookCampaign = () => {
 
       if (error) throw error;
 
+      // Send email notification
+      const { error: emailError } = await supabase.functions.invoke(
+        "send-campaign-notification",
+        {
+          body: {
+            campaignName: formData.campaignName,
+            businessName: formData.businessName,
+            targetArea: formData.targetArea,
+            budget: formData.budget,
+            vehicleType: formData.vehicleType,
+            description: formData.description || undefined,
+            startDate: format(startDate, "PPP"),
+            endDate: format(endDate, "PPP"),
+          },
+        }
+      );
+
+      if (emailError) {
+        console.error("Email error:", emailError);
+      }
+
       toast({
         title: "Campaign Created! 🎉",
         description: "Your campaign has been successfully submitted for review.",
@@ -409,8 +430,14 @@ const BookCampaign = () => {
                               {startDate ? format(startDate, "PPP") : "Pick a date"}
                             </Button>
                           </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0">
-                            <Calendar mode="single" selected={startDate} onSelect={setStartDate} initialFocus />
+                          <PopoverContent className="w-auto p-0 z-50" align="start">
+                            <Calendar 
+                              mode="single" 
+                              selected={startDate} 
+                              onSelect={setStartDate} 
+                              initialFocus 
+                              className="pointer-events-auto"
+                            />
                           </PopoverContent>
                         </Popover>
                       </div>
@@ -433,8 +460,14 @@ const BookCampaign = () => {
                               {endDate ? format(endDate, "PPP") : "Pick a date"}
                             </Button>
                           </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0">
-                            <Calendar mode="single" selected={endDate} onSelect={setEndDate} initialFocus />
+                          <PopoverContent className="w-auto p-0 z-50" align="start">
+                            <Calendar 
+                              mode="single" 
+                              selected={endDate} 
+                              onSelect={setEndDate} 
+                              initialFocus 
+                              className="pointer-events-auto"
+                            />
                           </PopoverContent>
                         </Popover>
                       </div>
