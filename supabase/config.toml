@@ -11,3 +11,6 @@ verify_jwt = false
 
 [functions.send-career-notification]
 verify_jwt = false
+
+[functions.send-campaign-notification]
+verify_jwt = false
