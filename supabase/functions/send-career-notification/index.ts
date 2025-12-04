@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { Resend } from "npm:resend@2.0.0";
+import { Resend } from "https://esm.sh/resend@2.0.0";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -15,6 +15,7 @@ interface CareerNotificationRequest {
   position: string;
   experience?: string;
   coverLetter?: string;
+  resumeUrl?: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -25,7 +26,7 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { name, email, phone, position, experience, coverLetter }: CareerNotificationRequest = await req.json();
+    const { name, email, phone, position, experience, coverLetter, resumeUrl }: CareerNotificationRequest = await req.json();
     
     console.log(`Processing job application from: ${name} for ${position}`);
 
@@ -45,6 +46,7 @@ const handler = async (req: Request): Promise<Response> => {
             <p><strong>Phone:</strong> ${phone}</p>
             <p><strong>Position Applied:</strong> ${position}</p>
             <p><strong>Experience:</strong> ${experience || "Not specified"}</p>
+            ${resumeUrl ? `<p><strong>Resume:</strong> <a href="${resumeUrl}" style="color: #f97316;">Download Resume</a></p>` : '<p><strong>Resume:</strong> Not uploaded</p>'}
           </div>
           
           ${coverLetter ? `
