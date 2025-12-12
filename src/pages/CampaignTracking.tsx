@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { MapPin, Car, TrendingUp, BarChart3, Filter, Route, Flame, AlertCircle, ShieldCheck, Sparkles, Target } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import AnimatedCounter from "@/components/AnimatedCounter";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 
@@ -593,7 +594,7 @@ export default function CampaignTracking() {
   }, [selectedCampaign]);
 
   const setupRealtimeSubscription = () => {
-    const channel = supabase
+    const gpsChannel = supabase
       .channel("gps-tracking-changes")
       .on(
         "postgres_changes",
@@ -609,8 +610,30 @@ export default function CampaignTracking() {
       )
       .subscribe();
 
+    const vehicleChannel = supabase
+      .channel("vehicles-changes")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "vehicles",
+        },
+        (payload) => {
+          console.log("Vehicle update:", payload);
+          loadVehicles();
+          toast.success("Vehicle fleet updated!", {
+            description: payload.eventType === "INSERT" 
+              ? "A new vehicle has come online" 
+              : "Vehicle status changed"
+          });
+        }
+      )
+      .subscribe();
+
     return () => {
-      supabase.removeChannel(channel);
+      supabase.removeChannel(gpsChannel);
+      supabase.removeChannel(vehicleChannel);
     };
   };
 
@@ -649,10 +672,15 @@ export default function CampaignTracking() {
 
         {/* Metrics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <Card className="p-6">
+          <Card className="p-6 relative overflow-hidden">
             <div className="flex items-center justify-between mb-2">
               <Car className="w-8 h-8 text-primary" />
-              <span className="text-2xl font-bold">{metrics.activeVehicles}</span>
+              <div className="relative">
+                <AnimatedCounter 
+                  value={metrics.activeVehicles} 
+                  className="text-2xl font-bold"
+                />
+              </div>
             </div>
             <p className="text-sm text-muted-foreground">Active Vehicles</p>
           </Card>
@@ -660,7 +688,11 @@ export default function CampaignTracking() {
           <Card className="p-6">
             <div className="flex items-center justify-between mb-2">
               <MapPin className="w-8 h-8 text-primary" />
-              <span className="text-2xl font-bold">{metrics.coverageArea.toFixed(1)} km²</span>
+              <AnimatedCounter 
+                value={parseFloat(metrics.coverageArea.toFixed(1))} 
+                className="text-2xl font-bold"
+                suffix=" km²"
+              />
             </div>
             <p className="text-sm text-muted-foreground">Coverage Area</p>
           </Card>
@@ -668,7 +700,10 @@ export default function CampaignTracking() {
           <Card className="p-6">
             <div className="flex items-center justify-between mb-2">
               <TrendingUp className="w-8 h-8 text-primary" />
-              <span className="text-2xl font-bold">{metrics.estimatedImpressions.toLocaleString()}</span>
+              <AnimatedCounter 
+                value={metrics.estimatedImpressions} 
+                className="text-2xl font-bold"
+              />
             </div>
             <p className="text-sm text-muted-foreground">Est. Impressions</p>
           </Card>
@@ -676,7 +711,11 @@ export default function CampaignTracking() {
           <Card className="p-6">
             <div className="flex items-center justify-between mb-2">
               <BarChart3 className="w-8 h-8 text-primary" />
-              <span className="text-2xl font-bold">{metrics.totalDistance.toFixed(1)} km</span>
+              <AnimatedCounter 
+                value={parseFloat(metrics.totalDistance.toFixed(1))} 
+                className="text-2xl font-bold"
+                suffix=" km"
+              />
             </div>
             <p className="text-sm text-muted-foreground">Total Distance</p>
           </Card>
