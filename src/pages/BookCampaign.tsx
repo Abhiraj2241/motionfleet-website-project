@@ -24,7 +24,8 @@ import {
   ArrowRight,
   Sparkles,
   Zap,
-  Car
+  Car,
+  Mail
 } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -43,6 +44,7 @@ const BookCampaign = () => {
   const [formData, setFormData] = useState({
     campaignName: "",
     businessName: "",
+    email: "",
     targetArea: "",
     budget: "",
     vehicleType: "",
@@ -90,6 +92,11 @@ const BookCampaign = () => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
   const validateStep = (step: number): boolean => {
     if (step === 1) {
       if (!formData.campaignName.trim()) {
@@ -104,6 +111,14 @@ const BookCampaign = () => {
         toast({
           title: "Business Name Required",
           description: "Please enter your business name to continue.",
+          variant: "destructive",
+        });
+        return false;
+      }
+      if (!formData.email.trim() || !validateEmail(formData.email.trim())) {
+        toast({
+          title: "Valid Email Required",
+          description: "Please enter a valid email address to continue.",
           variant: "destructive",
         });
         return false;
@@ -174,6 +189,7 @@ const BookCampaign = () => {
           body: {
             campaignName: formData.campaignName,
             businessName: formData.businessName,
+            email: formData.email.trim(),
             targetArea: formData.targetArea,
             budget: formData.budget,
             vehicleType: formData.vehicleType,
@@ -358,6 +374,21 @@ const BookCampaign = () => {
                           className="transition-all duration-200 focus:scale-[1.02]"
                         />
                       </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="email" className="flex items-center gap-2">
+                        <Mail className="w-4 h-4 text-primary" />
+                        Email Address *
+                      </Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="your@email.com"
+                        value={formData.email}
+                        onChange={(e) => handleInputChange("email", e.target.value)}
+                        className="transition-all duration-200 focus:scale-[1.02]"
+                      />
                     </div>
 
                     <div className="space-y-2">

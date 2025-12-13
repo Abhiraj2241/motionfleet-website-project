@@ -11,6 +11,7 @@ const corsHeaders = {
 interface CampaignNotificationRequest {
   campaignName: string;
   businessName: string;
+  email: string;
   targetArea: string;
   budget: string;
   vehicleType: string;
@@ -29,7 +30,7 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const data: CampaignNotificationRequest = await req.json();
     
-    console.log(`Processing campaign booking from: ${data.businessName}`);
+    console.log(`Processing campaign booking from: ${data.businessName} (${data.email})`);
 
     const vehicleTypeMap: Record<string, string> = {
       'auto': 'Auto Rickshaw',
@@ -38,7 +39,7 @@ const handler = async (req: Request): Promise<Response> => {
       'bus': 'Bus',
     };
 
-    // Send notification email to MotionFleet
+    // Send notification email to MotionFleet admin
     const adminEmailResponse = await resend.emails.send({
       from: "MotionFleet Campaigns <onboarding@resend.dev>",
       to: ["motionfleet7@gmail.com"],
@@ -55,6 +56,7 @@ const handler = async (req: Request): Promise<Response> => {
             <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0;">
               <p><strong>Campaign Name:</strong> ${data.campaignName}</p>
               <p><strong>Business Name:</strong> ${data.businessName}</p>
+              <p><strong>Contact Email:</strong> ${data.email}</p>
               <p><strong>Target Area:</strong> ${data.targetArea || "Not specified"}</p>
               <p><strong>Vehicle Type:</strong> ${vehicleTypeMap[data.vehicleType] || data.vehicleType || "Not specified"}</p>
               <p><strong>Monthly Budget:</strong> ₹${data.budget ? parseInt(data.budget).toLocaleString() : "Not specified"}</p>
@@ -85,10 +87,66 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("Admin notification email sent:", adminEmailResponse);
 
+    // Send confirmation email to the submitter
+    const userEmailResponse = await resend.emails.send({
+      from: "MotionFleet Campaigns <onboarding@resend.dev>",
+      to: [data.email],
+      subject: "Campaign Received - MotionFleet",
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="background: linear-gradient(135deg, #f97316, #ea580c); padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
+            <h1 style="color: white; margin: 0;">MotionFleet</h1>
+            <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0;">Mobile Advertising</p>
+          </div>
+          
+          <div style="padding: 30px; background: #ffffff;">
+            <h2 style="color: #333;">Thank You for Your Campaign Request!</h2>
+            <p style="color: #555; line-height: 1.6;">
+              Hi there! We've received your campaign booking for <strong>"${data.campaignName}"</strong>.
+            </p>
+            
+            <div style="background: #f0fdf4; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #22c55e;">
+              <h3 style="margin-top: 0; color: #333;">Your Campaign Summary</h3>
+              <p style="margin: 5px 0;"><strong>Campaign:</strong> ${data.campaignName}</p>
+              <p style="margin: 5px 0;"><strong>Business:</strong> ${data.businessName}</p>
+              <p style="margin: 5px 0;"><strong>Target Area:</strong> ${data.targetArea || "Not specified"}</p>
+              <p style="margin: 5px 0;"><strong>Vehicle Type:</strong> ${vehicleTypeMap[data.vehicleType] || data.vehicleType || "Not specified"}</p>
+              <p style="margin: 5px 0;"><strong>Budget:</strong> ₹${data.budget ? parseInt(data.budget).toLocaleString() : "Not specified"}/month</p>
+              <p style="margin: 5px 0;"><strong>Duration:</strong> ${data.startDate} to ${data.endDate}</p>
+            </div>
+            
+            <div style="background: #fff7ed; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <h3 style="margin-top: 0; color: #333;">What's Next?</h3>
+              <ul style="color: #555; margin: 0; padding-left: 20px;">
+                <li>Our team will review your campaign details</li>
+                <li>We'll contact you within 24-48 hours</li>
+                <li>Discuss design and vehicle placement</li>
+                <li>Launch your campaign!</li>
+              </ul>
+            </div>
+            
+            <p style="color: #555; line-height: 1.6;">
+              Have questions? Reply to this email or call us at <strong>+91 98765 43210</strong>.
+            </p>
+          </div>
+          
+          <div style="background: #1a1a1a; padding: 20px; text-align: center; border-radius: 0 0 8px 8px;">
+            <p style="color: #999; font-size: 12px; margin: 0;">
+              © 2024 MotionFleet. All rights reserved.<br>
+              Agra, India | campaigns@motionfleet.com
+            </p>
+          </div>
+        </div>
+      `,
+    });
+
+    console.log("User confirmation email sent:", userEmailResponse);
+
     return new Response(
       JSON.stringify({ 
         success: true, 
-        adminEmail: adminEmailResponse
+        adminEmail: adminEmailResponse,
+        userEmail: userEmailResponse
       }),
       {
         status: 200,
