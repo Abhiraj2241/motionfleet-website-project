@@ -31,6 +31,7 @@ import { supabase } from "@/integrations/supabase/client";
 const Contact = () => {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [emailError, setEmailError] = useState("");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -39,8 +40,36 @@ const Contact = () => {
     message: "",
   });
 
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const email = e.target.value;
+    setFormData({ ...formData, email });
+    
+    if (email && !validateEmail(email)) {
+      setEmailError("Please enter a valid email address");
+    } else {
+      setEmailError("");
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate email before submission
+    if (!validateEmail(formData.email.trim())) {
+      setEmailError("Please enter a valid email address");
+      toast({
+        title: "Invalid Email",
+        description: "Please enter a valid email address to continue.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -91,6 +120,7 @@ const Contact = () => {
         company: "",
         message: "",
       });
+      setEmailError("");
     } catch (error: any) {
       console.error("Submit error:", error);
       toast({
@@ -283,11 +313,14 @@ const Contact = () => {
                       id="email"
                       type="email"
                       value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      onChange={handleEmailChange}
                       required
                       placeholder="john@example.com"
-                      className="mt-2"
+                      className={`mt-2 ${emailError ? "border-destructive focus-visible:ring-destructive" : ""}`}
                     />
+                    {emailError && (
+                      <p className="text-sm text-destructive mt-1">{emailError}</p>
+                    )}
                   </div>
                 </div>
 
