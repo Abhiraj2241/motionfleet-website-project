@@ -90,8 +90,52 @@ const BookCampaign = () => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
+  const validateStep = (step: number): boolean => {
+    if (step === 1) {
+      if (!formData.campaignName.trim()) {
+        toast({
+          title: "Campaign Name Required",
+          description: "Please enter a campaign name to continue.",
+          variant: "destructive",
+        });
+        return false;
+      }
+      if (!formData.businessName.trim()) {
+        toast({
+          title: "Business Name Required",
+          description: "Please enter your business name to continue.",
+          variant: "destructive",
+        });
+        return false;
+      }
+    }
+    
+    if (step === 2) {
+      if (!formData.targetArea.trim()) {
+        toast({
+          title: "Target Area Required",
+          description: "Please enter a target area to continue.",
+          variant: "destructive",
+        });
+        return false;
+      }
+      if (!formData.vehicleType) {
+        toast({
+          title: "Vehicle Type Required",
+          description: "Please select a vehicle type to continue.",
+          variant: "destructive",
+        });
+        return false;
+      }
+    }
+    
+    return true;
+  };
+
   const handleNext = () => {
-    if (currentStep < 3) setCurrentStep(currentStep + 1);
+    if (validateStep(currentStep) && currentStep < 3) {
+      setCurrentStep(currentStep + 1);
+    }
   };
 
   const handleBack = () => {
