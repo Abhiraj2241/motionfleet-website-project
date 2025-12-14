@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { ArrowRight, Download, MapPin } from "lucide-react";
+import { ArrowRight, MapPin } from "lucide-react";
+import AnimatedCounter from "./AnimatedCounter";
 
 const Hero = () => {
   return (
@@ -46,15 +47,21 @@ const Hero = () => {
           {/* Stats */}
           <div className="grid grid-cols-3 gap-8 max-w-2xl mx-auto">
             <div className="p-4 bg-card rounded-lg border border-border hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 hover-scale">
-              <div className="text-3xl md:text-4xl font-bold text-primary mb-1 animate-fade-in">0</div>
+              <div className="text-3xl md:text-4xl font-bold text-primary mb-1">
+                <AnimatedCounter value={50000} suffix="+" duration={2000} />
+              </div>
               <div className="text-sm text-muted-foreground">Daily Impressions</div>
             </div>
             <div className="p-4 bg-card rounded-lg border border-border hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 hover-scale">
-              <div className="text-3xl md:text-4xl font-bold text-primary mb-1 animate-fade-in">0</div>
+              <div className="text-3xl md:text-4xl font-bold text-primary mb-1">
+                <AnimatedCounter value={500} suffix="+" duration={1500} />
+              </div>
               <div className="text-sm text-muted-foreground">Active Vehicles</div>
             </div>
             <div className="p-4 bg-card rounded-lg border border-border hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 hover-scale">
-              <div className="text-3xl md:text-4xl font-bold text-primary mb-1 animate-fade-in">0</div>
+              <div className="text-3xl md:text-4xl font-bold text-primary mb-1">
+                <AnimatedCounter value={100} suffix="+" duration={1000} />
+              </div>
               <div className="text-sm text-muted-foreground">Happy Brands</div>
             </div>
           </div>
