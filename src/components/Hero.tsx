@@ -126,40 +126,40 @@ const Hero = () => {
   }, []);
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16 md:pt-20 px-4">
       {/* Animated Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-card">
         <div className="absolute inset-0 opacity-20">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/30 rounded-full blur-3xl animate-float"></div>
-          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl animate-float" style={{ animationDelay: "1s" }}></div>
+          <div className="absolute top-1/4 left-1/4 w-48 md:w-96 h-48 md:h-96 bg-primary/30 rounded-full blur-3xl animate-float"></div>
+          <div className="absolute bottom-1/4 right-1/4 w-48 md:w-96 h-48 md:h-96 bg-primary/20 rounded-full blur-3xl animate-float" style={{ animationDelay: "1s" }}></div>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 relative z-10">
+      <div className="container mx-auto relative z-10">
         <div className="max-w-4xl mx-auto text-center animate-fade-in">
-          <div className="inline-block mb-4 px-4 py-2 bg-card border border-primary/20 rounded-full text-sm font-medium">
+          <div className="inline-block mb-3 md:mb-4 px-3 md:px-4 py-1.5 md:py-2 bg-card border border-primary/20 rounded-full text-xs md:text-sm font-medium">
             🚀 Hyperlocal Advertising Platform
           </div>
           
-          <h1 className="mb-6 leading-tight">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl mb-4 md:mb-6 leading-tight font-bold">
             Transform Urban Mobility Into a{" "}
             <span className="text-gradient">Moving Billboard</span>
           </h1>
           
-          <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+          <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-muted-foreground mb-6 md:mb-8 max-w-2xl mx-auto px-2">
             Advertise on autos, rickshaws & mobility fleets—reach thousands daily with data-driven, hyperlocal campaigns.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <Button size="lg" asChild className="gradient-primary font-bold text-lg group">
+          <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center mb-8 md:mb-12 px-4 sm:px-0">
+            <Button size="lg" asChild className="gradient-primary font-bold text-base md:text-lg group w-full sm:w-auto">
               <Link to="/contact">
                 Book a Campaign
-                <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" size={20} />
+                <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" size={18} />
               </Link>
             </Button>
-            <Button size="lg" variant="outline" asChild className="border-primary/50 hover:bg-primary/10">
+            <Button size="lg" variant="outline" asChild className="border-primary/50 hover:bg-primary/10 w-full sm:w-auto">
               <Link to="/tracking">
-                <MapPin className="mr-2" size={20} />
+                <MapPin className="mr-2" size={18} />
                 Track Live
               </Link>
             </Button>
@@ -168,48 +168,48 @@ const Hero = () => {
           {/* Stats with Intersection Observer */}
           <div 
             ref={statsRef}
-            className={`grid grid-cols-3 gap-8 max-w-2xl mx-auto transition-all duration-700 ${
+            className={`grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6 lg:gap-8 max-w-2xl mx-auto transition-all duration-700 ${
               isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
             }`}
           >
-            <div className="p-4 bg-card rounded-lg border border-border hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 hover-scale">
-              <div className="text-3xl md:text-4xl font-bold text-primary mb-1">
+            <div className="p-3 md:p-4 bg-card rounded-lg border border-border hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 hover-scale">
+              <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-primary mb-1">
                 <AnimatedStat 
                   value={stats.dailyImpressions} 
                   duration={2000} 
                   isVisible={isVisible}
                 />
               </div>
-              <div className="text-sm text-muted-foreground">Daily Impressions</div>
+              <div className="text-xs md:text-sm text-muted-foreground">Daily Impressions</div>
             </div>
-            <div className="p-4 bg-card rounded-lg border border-border hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 hover-scale">
-              <div className="text-3xl md:text-4xl font-bold text-primary mb-1">
+            <div className="p-3 md:p-4 bg-card rounded-lg border border-border hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 hover-scale">
+              <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-primary mb-1">
                 <AnimatedStat 
                   value={stats.activeVehicles} 
                   duration={1500} 
                   isVisible={isVisible}
                 />
               </div>
-              <div className="text-sm text-muted-foreground">Active Vehicles</div>
+              <div className="text-xs md:text-sm text-muted-foreground">Active Vehicles</div>
             </div>
-            <div className="p-4 bg-card rounded-lg border border-border hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 hover-scale">
-              <div className="text-3xl md:text-4xl font-bold text-primary mb-1">
+            <div className="p-3 md:p-4 bg-card rounded-lg border border-border hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 hover-scale">
+              <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-primary mb-1">
                 <AnimatedStat 
                   value={stats.happyBrands} 
                   duration={1000} 
                   isVisible={isVisible}
                 />
               </div>
-              <div className="text-sm text-muted-foreground">Happy Brands</div>
+              <div className="text-xs md:text-sm text-muted-foreground">Happy Brands</div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Scroll Indicator */}
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-        <div className="w-6 h-10 border-2 border-primary/50 rounded-full flex items-start justify-center p-2">
-          <div className="w-1 h-3 bg-primary rounded-full animate-pulse"></div>
+      {/* Scroll Indicator - hidden on mobile */}
+      <div className="absolute bottom-4 md:bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce hidden sm:flex">
+        <div className="w-5 h-8 md:w-6 md:h-10 border-2 border-primary/50 rounded-full flex items-start justify-center p-1.5 md:p-2">
+          <div className="w-1 h-2 md:h-3 bg-primary rounded-full animate-pulse"></div>
         </div>
       </div>
     </section>
