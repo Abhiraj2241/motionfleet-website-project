@@ -1,12 +1,21 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X } from "lucide-react";
+import { Menu, X, LogIn, LogOut, User } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const { user, signOut, isAdmin, loading } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -25,6 +34,11 @@ const Navbar = () => {
     { name: "Careers", path: "/careers" },
     { name: "Contact", path: "/contact" },
   ];
+
+  const handleSignOut = async () => {
+    await signOut();
+    setIsMobileMenuOpen(false);
+  };
 
   return (
     <nav
@@ -57,9 +71,44 @@ const Navbar = () => {
           </div>
 
           <div className="hidden lg:flex items-center space-x-3">
-            <Button variant="outline" size="sm" asChild className="text-sm">
-              <Link to="/contact">Get Started</Link>
-            </Button>
+            {!loading && (
+              <>
+                {user ? (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" size="sm" className="text-sm gap-2">
+                        <User size={16} />
+                        <span className="max-w-[100px] truncate">
+                          {user.email?.split('@')[0]}
+                        </span>
+                        {isAdmin && (
+                          <span className="bg-primary text-primary-foreground text-xs px-1.5 py-0.5 rounded">
+                            Admin
+                          </span>
+                        )}
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-48">
+                      <DropdownMenuItem className="text-sm text-muted-foreground">
+                        {user.email}
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={handleSignOut} className="text-red-500 cursor-pointer">
+                        <LogOut size={16} className="mr-2" />
+                        Sign Out
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                ) : (
+                  <Button variant="outline" size="sm" asChild className="text-sm gap-2">
+                    <Link to="/auth">
+                      <LogIn size={16} />
+                      Sign In
+                    </Link>
+                  </Button>
+                )}
+              </>
+            )}
             <Button size="sm" asChild className="gradient-primary font-bold text-sm">
               <Link to="/book-campaign">Book Campaign</Link>
             </Button>
@@ -78,7 +127,7 @@ const Navbar = () => {
         {/* Mobile Menu */}
         <div 
           className={`lg:hidden overflow-hidden transition-all duration-300 ease-in-out ${
-            isMobileMenuOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
+            isMobileMenuOpen ? "max-h-[600px] opacity-100" : "max-h-0 opacity-0"
           }`}
         >
           <div className="py-4 border-t border-border bg-background/95 backdrop-blur-lg">
@@ -96,11 +145,38 @@ const Navbar = () => {
                 </Link>
               ))}
               <div className="pt-4 px-4 space-y-3">
-                <Button asChild variant="outline" className="w-full">
-                  <Link to="/contact" onClick={() => setIsMobileMenuOpen(false)}>
-                    Get Started
-                  </Link>
-                </Button>
+                {!loading && (
+                  <>
+                    {user ? (
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2 px-3 py-2 bg-muted rounded-lg">
+                          <User size={16} className="text-muted-foreground" />
+                          <span className="text-sm truncate">{user.email}</span>
+                          {isAdmin && (
+                            <span className="bg-primary text-primary-foreground text-xs px-1.5 py-0.5 rounded ml-auto">
+                              Admin
+                            </span>
+                          )}
+                        </div>
+                        <Button 
+                          variant="outline" 
+                          className="w-full text-red-500 border-red-500/30 hover:bg-red-500/10"
+                          onClick={handleSignOut}
+                        >
+                          <LogOut size={16} className="mr-2" />
+                          Sign Out
+                        </Button>
+                      </div>
+                    ) : (
+                      <Button asChild variant="outline" className="w-full">
+                        <Link to="/auth" onClick={() => setIsMobileMenuOpen(false)}>
+                          <LogIn size={16} className="mr-2" />
+                          Sign In
+                        </Link>
+                      </Button>
+                    )}
+                  </>
+                )}
                 <Button asChild className="w-full gradient-primary font-bold">
                   <Link to="/book-campaign" onClick={() => setIsMobileMenuOpen(false)}>
                     Book Campaign
