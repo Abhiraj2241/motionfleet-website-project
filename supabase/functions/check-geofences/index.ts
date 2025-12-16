@@ -1,15 +1,17 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.84.0';
+import { z } from 'https://esm.sh/zod@3.22.4';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-interface GeofenceCheckRequest {
-  vehicleId: string;
-  latitude: number;
-  longitude: number;
-}
+// Input validation schema
+const GeofenceCheckSchema = z.object({
+  vehicleId: z.string().uuid('Invalid vehicle ID format'),
+  latitude: z.number().min(-90, 'Latitude must be >= -90').max(90, 'Latitude must be <= 90'),
+  longitude: z.number().min(-180, 'Longitude must be >= -180').max(180, 'Longitude must be <= 180'),
+});
 
 interface Geofence {
   id: string;
@@ -55,7 +57,22 @@ Deno.serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const { vehicleId, latitude, longitude }: GeofenceCheckRequest = await req.json();
+    // Parse and validate input
+    const rawBody = await req.json();
+    const validationResult = GeofenceCheckSchema.safeParse(rawBody);
+    
+    if (!validationResult.success) {
+      console.error('Validation error:', validationResult.error.errors);
+      return new Response(
+        JSON.stringify({ 
+          error: 'Invalid input', 
+          details: validationResult.error.errors.map(e => e.message) 
+        }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const { vehicleId, latitude, longitude } = validationResult.data;
 
     console.log('Checking geofences for vehicle:', vehicleId, 'at', latitude, longitude);
 
@@ -167,9 +184,8 @@ Deno.serve(async (req) => {
     );
   } catch (error) {
     console.error('Error in check-geofences:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return new Response(
-      JSON.stringify({ error: errorMessage }),
+      JSON.stringify({ error: 'An unexpected error occurred' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }

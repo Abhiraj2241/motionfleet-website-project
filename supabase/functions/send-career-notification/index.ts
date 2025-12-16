@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "https://esm.sh/resend@2.0.0";
+import { z } from 'https://esm.sh/zod@3.22.4';
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -8,14 +9,27 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-interface CareerNotificationRequest {
-  name: string;
-  email: string;
-  phone: string;
-  position: string;
-  experience?: string;
-  coverLetter?: string;
-  resumeUrl?: string;
+// Input validation schema
+const CareerSchema = z.object({
+  name: z.string().trim().min(1, 'Name is required').max(100, 'Name must be less than 100 characters'),
+  email: z.string().trim().email('Invalid email format').max(255, 'Email must be less than 255 characters'),
+  phone: z.string().trim().min(1, 'Phone is required').max(20, 'Phone must be less than 20 characters'),
+  position: z.string().trim().min(1, 'Position is required').max(100, 'Position must be less than 100 characters'),
+  experience: z.string().trim().max(50, 'Experience must be less than 50 characters').optional(),
+  coverLetter: z.string().trim().max(10000, 'Cover letter must be less than 10000 characters').optional(),
+  resumeUrl: z.string().url('Invalid resume URL').max(500, 'Resume URL too long').optional().nullable(),
+});
+
+// HTML escape function to prevent XSS
+function escapeHtml(text: string): string {
+  const map: Record<string, string> = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;',
+  };
+  return text.replace(/[&<>"']/g, (char) => map[char]);
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -26,33 +40,56 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { name, email, phone, position, experience, coverLetter, resumeUrl }: CareerNotificationRequest = await req.json();
+    // Parse and validate input
+    const rawBody = await req.json();
+    const validationResult = CareerSchema.safeParse(rawBody);
     
-    console.log(`Processing job application from: ${name} for ${position}`);
+    if (!validationResult.success) {
+      console.error('Validation error:', validationResult.error.errors);
+      return new Response(
+        JSON.stringify({ 
+          error: 'Invalid input', 
+          details: validationResult.error.errors.map(e => e.message) 
+        }),
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
+    const { name, email, phone, position, experience, coverLetter, resumeUrl } = validationResult.data;
+    
+    // Escape HTML in all user inputs
+    const safeName = escapeHtml(name);
+    const safeEmail = escapeHtml(email);
+    const safePhone = escapeHtml(phone);
+    const safePosition = escapeHtml(position);
+    const safeExperience = escapeHtml(experience || 'Not specified');
+    const safeCoverLetter = coverLetter ? escapeHtml(coverLetter) : '';
+    
+    console.log(`Processing job application from: ${safeName} for ${safePosition}`);
 
     // Send notification email to MotionFleet
     const adminEmailResponse = await resend.emails.send({
       from: "MotionFleet Careers <onboarding@resend.dev>",
       to: ["motionfleet7@gmail.com"],
-      subject: `New Job Application: ${position} - ${name}`,
+      subject: `New Job Application: ${safePosition} - ${safeName}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h1 style="color: #f97316; border-bottom: 2px solid #f97316; padding-bottom: 10px;">New Job Application</h1>
           
           <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <h2 style="margin-top: 0; color: #333;">Applicant Details</h2>
-            <p><strong>Name:</strong> ${name}</p>
-            <p><strong>Email:</strong> ${email}</p>
-            <p><strong>Phone:</strong> ${phone}</p>
-            <p><strong>Position Applied:</strong> ${position}</p>
-            <p><strong>Experience:</strong> ${experience || "Not specified"}</p>
-            ${resumeUrl ? `<p><strong>Resume:</strong> <a href="${resumeUrl}" style="color: #f97316;">Download Resume</a></p>` : '<p><strong>Resume:</strong> Not uploaded</p>'}
+            <p><strong>Name:</strong> ${safeName}</p>
+            <p><strong>Email:</strong> ${safeEmail}</p>
+            <p><strong>Phone:</strong> ${safePhone}</p>
+            <p><strong>Position Applied:</strong> ${safePosition}</p>
+            <p><strong>Experience:</strong> ${safeExperience}</p>
+            ${resumeUrl ? `<p><strong>Resume:</strong> <a href="${escapeHtml(resumeUrl)}" style="color: #f97316;">Download Resume</a></p>` : '<p><strong>Resume:</strong> Not uploaded</p>'}
           </div>
           
-          ${coverLetter ? `
+          ${safeCoverLetter ? `
           <div style="background: #fff3e0; padding: 20px; border-radius: 8px; border-left: 4px solid #f97316;">
             <h3 style="margin-top: 0; color: #333;">Cover Letter</h3>
-            <p style="white-space: pre-wrap;">${coverLetter}</p>
+            <p style="white-space: pre-wrap;">${safeCoverLetter}</p>
           </div>
           ` : ''}
           
@@ -63,7 +100,7 @@ const handler = async (req: Request): Promise<Response> => {
       `,
     });
 
-    console.log("Admin notification email sent:", adminEmailResponse);
+    console.log("Admin notification email sent successfully");
 
     // Send confirmation email to applicant
     const userEmailResponse = await resend.emails.send({
@@ -78,9 +115,9 @@ const handler = async (req: Request): Promise<Response> => {
           </div>
           
           <div style="padding: 30px; background: #ffffff;">
-            <h2 style="color: #333;">Hi ${name}!</h2>
+            <h2 style="color: #333;">Hi ${safeName}!</h2>
             <p style="color: #555; line-height: 1.6;">
-              Thank you for applying for the <strong>${position}</strong> position at MotionFleet!
+              Thank you for applying for the <strong>${safePosition}</strong> position at MotionFleet!
             </p>
             <p style="color: #555; line-height: 1.6;">
               We have received your application and our HR team will review it carefully. If your profile matches our requirements, we will contact you within 5-7 business days.
@@ -111,27 +148,17 @@ const handler = async (req: Request): Promise<Response> => {
       `,
     });
 
-    console.log("Applicant confirmation email sent:", userEmailResponse);
+    console.log("Applicant confirmation email sent successfully");
 
     return new Response(
-      JSON.stringify({ 
-        success: true, 
-        adminEmail: adminEmailResponse,
-        userEmail: userEmailResponse 
-      }),
-      {
-        status: 200,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      }
+      JSON.stringify({ success: true }),
+      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
     );
   } catch (error: any) {
     console.error("Error in send-career-notification function:", error);
     return new Response(
-      JSON.stringify({ error: error.message }),
-      {
-        status: 500,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      }
+      JSON.stringify({ error: 'An unexpected error occurred' }),
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
     );
   }
 };
