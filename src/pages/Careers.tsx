@@ -98,11 +98,8 @@ const Careers = () => {
         throw uploadError;
       }
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('resumes')
-        .getPublicUrl(filePath);
-
-      return publicUrl;
+      // Return the file path only - admins can use signed URLs to access
+      return filePath;
     } catch (error) {
       console.error("Resume upload failed:", error);
       throw error;
