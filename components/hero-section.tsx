@@ -50,10 +50,18 @@ export default function HeroSection() {
 
         {/* CTA Buttons */}
         <div ref={ctaRef} className="flex flex-col md:flex-row items-center justify-center gap-4">
-          <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2">
+          <Button 
+            size="lg" 
+            className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2"
+            onClick={() => document.getElementById('work')?.scrollIntoView({ behavior: 'smooth' })}
+          >
             Explore Projects →
           </Button>
-          <Button size="lg" variant="outline">
+          <Button 
+            size="lg" 
+            variant="outline"
+            onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
+          >
             Connect with Me
           </Button>
         </div>

@@ -27,12 +27,22 @@ export default function Home() {
     <main className="min-h-screen bg-background text-foreground">
       <Navigation isDark={isDark} setIsDark={setIsDark} />
       <HeroSection />
-      <AboutSection />
+      <div id="about">
+        <AboutSection />
+      </div>
       <MotionFleetSection />
-      <JourneySection />
-      <PortfolioSection />
-      <TestimonialsSection />
-      <ContactSection />
+      <div id="journey">
+        <JourneySection />
+      </div>
+      <div id="work">
+        <PortfolioSection />
+      </div>
+      <div id="testimonials">
+        <TestimonialsSection />
+      </div>
+      <div id="contact">
+        <ContactSection />
+      </div>
       <Footer />
     </main>
   )
