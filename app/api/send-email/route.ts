@@ -50,7 +50,7 @@ export async function POST(request: Request) {
             Authorization: `Bearer ${resendApiKey}`,
           },
           body: JSON.stringify({
-            from: "onboarding@resend.dev",
+            from: "Abhirajsharma191@gmail.com",
             to: "Abhirajsharma191@gmail.com",
             subject: `New Portfolio Contact from ${name}`,
             html: `
