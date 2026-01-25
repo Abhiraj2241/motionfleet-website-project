@@ -115,7 +115,7 @@ export default function PortfolioSection() {
   }, [])
 
   return (
-    <section id="portfolio" ref={sectionRef} className="py-20 px-6 bg-background">
+    <section id="portfolio" ref={sectionRef} className="py-20 px-6 bg-background mx-6 md:mx-12 my-8 rounded-2xl glass-border">
       <div className="max-w-5xl mx-auto">
         {/* Header */}
         <div

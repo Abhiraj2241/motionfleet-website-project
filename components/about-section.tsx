@@ -49,7 +49,7 @@ export default function AboutSection() {
   ]
 
   return (
-    <section id="about" ref={sectionRef} className="py-20 px-6 bg-card/50">
+    <section id="about" ref={sectionRef} className="py-20 px-6 bg-card/50 mx-6 md:mx-12 my-8 rounded-2xl glass-border">
       <div className="max-w-5xl mx-auto">
         {/* Header */}
         <div

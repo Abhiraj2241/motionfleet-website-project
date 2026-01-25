@@ -74,7 +74,7 @@ export default function ContactSection() {
   ]
 
   return (
-    <section id="contact" className="relative py-24 px-6 overflow-hidden">
+    <section id="contact" className="relative py-24 px-6 overflow-hidden mx-6 md:mx-12 my-8 rounded-2xl glass-border">
       <div className="max-w-4xl mx-auto">
         <div className="mb-12 space-y-4">
           <p className="text-primary text-sm font-semibold uppercase tracking-wide">Get In Touch</p>

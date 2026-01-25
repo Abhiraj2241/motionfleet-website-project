@@ -171,6 +171,24 @@ html {
   }
 }
 
+@keyframes glassBorder {
+  0% {
+    border-color: rgba(230, 126, 34, 0.3);
+    box-shadow: 0 8px 32px rgba(230, 126, 34, 0.1), inset 0 0 32px rgba(230, 126, 34, 0.05);
+    background: rgba(255, 255, 255, 0.02);
+  }
+  50% {
+    border-color: rgba(230, 126, 34, 0.6);
+    box-shadow: 0 8px 32px rgba(230, 126, 34, 0.2), inset 0 0 32px rgba(230, 126, 34, 0.1);
+    background: rgba(255, 255, 255, 0.04);
+  }
+  100% {
+    border-color: rgba(230, 126, 34, 0.3);
+    box-shadow: 0 8px 32px rgba(230, 126, 34, 0.1), inset 0 0 32px rgba(230, 126, 34, 0.05);
+    background: rgba(255, 255, 255, 0.02);
+  }
+}
+
 .animate-float {
   animation: float 6s ease-in-out infinite;
 }
@@ -185,4 +203,12 @@ html {
 
 .animate-fade-in {
   animation: fadeIn 0.6s ease-out;
+}
+
+.glass-border {
+  border: 2px solid rgba(230, 126, 34, 0.3);
+  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.02);
+  box-shadow: 0 8px 32px rgba(230, 126, 34, 0.1), inset 0 0 32px rgba(230, 126, 34, 0.05);
+  animation: glassBorder 3s ease-in-out infinite;
 }
