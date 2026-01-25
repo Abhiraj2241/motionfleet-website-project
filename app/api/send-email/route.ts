@@ -50,7 +50,7 @@ export async function POST(request: Request) {
             Authorization: `Bearer ${resendApiKey}`,
           },
           body: JSON.stringify({
-            from: "noreply@abhirajsharma.com",
+            from: "onboarding@resend.dev",
             to: "Abhirajsharma191@gmail.com",
             subject: `New Portfolio Contact from ${name}`,
             html: `
@@ -78,9 +78,11 @@ export async function POST(request: Request) {
 
         if (!response.ok) {
           const error = await response.json()
-          console.error("[v0] Resend API error:", error)
+          console.error("[v0] Resend API error:", error.message || error)
+          console.log("[v0] Message stored locally, email sending failed - but message is safe")
         } else {
-          console.log(`[v0] Email sent via Resend for message: ${messageData.id}`);
+          const result = await response.json()
+          console.log(`[v0] Email sent successfully via Resend: ${result.id}`);
         }
       } catch (emailError) {
         console.error("[v0] Email sending failed, but message was stored locally:", emailError)
