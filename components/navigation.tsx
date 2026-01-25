@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
+import { useEffect, useState } from "react"
+import PillNav from "@/components/pill-nav"
 
 interface NavigationProps {
   isDark: boolean
@@ -9,9 +9,14 @@ interface NavigationProps {
 }
 
 export default function Navigation({ isDark, setIsDark }: NavigationProps) {
-  const [isOpen, setIsOpen] = useState(false)
+  const [mounted, setMounted] = useState(false)
 
-  const navLinks = [
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  const navItems = [
+    { label: "Home", href: "/" },
     { label: "About", href: "#about" },
     { label: "Work", href: "#work" },
     { label: "Journey", href: "#journey" },
@@ -19,66 +24,29 @@ export default function Navigation({ isDark, setIsDark }: NavigationProps) {
     { label: "Contact", href: "#contact" },
   ]
 
+  if (!mounted) return null
+
   return (
-    <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
-      <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
-        {/* Logo */}
-        <a
-          href="#"
-          className="font-bold text-xl bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent"
-        >
-          AS
-        </a>
-
-        {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center gap-8">
-          {navLinks.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              {link.label}
-            </a>
-          ))}
-        </div>
-
-        {/* Theme Toggle & Menu */}
-        <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setIsDark(!isDark)}
-            aria-label="Toggle theme"
-            className="text-lg"
-          >
-            {isDark ? "☀️" : "🌙"}
-          </Button>
-
-          {/* Mobile Menu Button */}
-          <button className="md:hidden p-2 text-lg" onClick={() => setIsOpen(!isOpen)} aria-label="Toggle menu">
-            {isOpen ? "✕" : "☰"}
-          </button>
-        </div>
-      </div>
-
-      {/* Mobile Navigation */}
-      {isOpen && (
-        <div className="md:hidden border-t border-border bg-card">
-          <div className="px-6 py-4 space-y-4">
-            {navLinks.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
-                onClick={() => setIsOpen(false)}
-              >
-                {link.label}
-              </a>
-            ))}
-          </div>
-        </div>
-      )}
-    </nav>
+    <div className="relative">
+      <PillNav
+        logo="AS"
+        logoAlt="Abhiraj Sharma"
+        items={navItems}
+        baseColor={isDark ? "#fff" : "#000"}
+        pillColor={isDark ? "#060010" : "#f5f5f5"}
+        pillTextColor={isDark ? "#fff" : "#000"}
+        hoveredPillTextColor={isDark ? "#060010" : "#fff"}
+        className={isDark ? "dark-pill-nav" : "light-pill-nav"}
+      />
+      {/* Theme Toggle Button */}
+      <button
+        onClick={() => setIsDark(!isDark)}
+        aria-label="Toggle theme"
+        className="absolute right-6 top-1/2 -translate-y-1/2 text-xl hover:scale-110 transition-transform z-50"
+        style={{ fontSize: "20px" }}
+      >
+        {isDark ? "☀️" : "🌙"}
+      </button>
+    </div>
   )
 }
