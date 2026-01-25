@@ -36,27 +36,25 @@ export default function HeroSection() {
         {/* Title */}
         <div ref={titleRef} className="space-y-4">
           <h1 className="text-5xl md:text-7xl font-bold leading-tight text-balance">
-            Designing the{" "}
-            <span className="bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent">Future</span>{" "}
-            of Mobility
+            Transforming Data into{" "}
+            <span className="bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent">Actionable Insights</span>
           </h1>
         </div>
 
         {/* Description */}
         <div ref={descriptionRef}>
           <p className="text-lg md:text-xl text-muted-foreground text-balance">
-            I'm Abhiraj Sharma, Founder & CEO of MotionFleet. Passionate about creating exceptional UI/UX experiences
-            that drive meaningful innovation in logistics and mobility technology.
+            I'm Abhiraj Sharma, Data Analyst & Analytics Professional. Specialized in uncovering patterns, driving data-driven decision-making, and delivering impactful insights that fuel business growth and innovation across multiple industries.
           </p>
         </div>
 
         {/* CTA Buttons */}
         <div ref={ctaRef} className="flex flex-col md:flex-row items-center justify-center gap-4">
           <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2">
-            View My Work →
+            Explore Projects →
           </Button>
           <Button size="lg" variant="outline">
-            Get in Touch
+            Connect with Me
           </Button>
         </div>
 
