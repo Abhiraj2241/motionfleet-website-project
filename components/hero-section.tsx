@@ -19,13 +19,13 @@ export default function HeroSection() {
         {/* Subtitle Badge */}
         <div className="inline-block">
           <div className="px-4 py-2 rounded-full border border-primary/30 bg-primary/5 backdrop-blur-sm">
-            <p className="text-sm font-medium text-primary">Welcome to My Portfolio</p>
+            <p className="text-sm font-medium text-orange-500">Welcome to My Portfolio</p>
           </div>
         </div>
 
         {/* Title */}
         <div className="space-y-3">
-          <h1 className="text-5xl md:text-7xl font-bold leading-tight text-balance">
+          <h1 className="text-5xl md:text-7xl font-bold leading-tight text-balance text-foreground">
             Transforming Data into{" "}
             <span className="bg-gradient-to-r from-orange-500 via-orange-400 to-orange-600 bg-clip-text text-transparent">
               Insights
