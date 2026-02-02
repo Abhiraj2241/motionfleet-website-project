@@ -245,13 +245,10 @@ const PillNav = ({
         {isRouterLink(items?.[0]?.href) ? (
           <Link
             className="pill-logo"
-            to={items[0].href}
+            href={items[0]?.href || "/"}
             aria-label="Home"
             onMouseEnter={handleLogoEnter}
             role="menuitem"
-            ref={el => {
-              logoRef.current = el;
-            }}
           >
             <img src={logo || "/placeholder.svg"} alt={logoAlt} ref={logoImgRef} />
           </Link>
@@ -276,7 +273,7 @@ const PillNav = ({
                 {isRouterLink(item.href) ? (
                   <Link
                     role="menuitem"
-                    to={item.href}
+                    href={item.href}
                     className={`pill${activeHref === item.href ? ' is-active' : ''}`}
                     aria-label={item.ariaLabel || item.label}
                     onMouseEnter={() => handleEnter(i)}
@@ -342,7 +339,7 @@ const PillNav = ({
             <li key={item.href || `mobile-item-${i}`}>
               {isRouterLink(item.href) ? (
                 <Link
-                  to={item.href}
+                  href={item.href}
                   className={`mobile-menu-link${activeHref === item.href ? ' is-active' : ''}`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
