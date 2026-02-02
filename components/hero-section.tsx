@@ -25,7 +25,7 @@ export default function HeroSection() {
   }, [])
 
   return (
-    <section className="relative min-h-screen w-full flex items-center justify-center px-6 py-24 pt-32 md:pt-40">
+    <section className="relative w-full flex items-center justify-center px-6 py-32 md:py-40">
       {/* Animated Background Gradient */}
       <div className="absolute inset-0 -z-20">
         <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-primary/20 rounded-full blur-3xl opacity-40 animate-pulse" />
@@ -42,19 +42,19 @@ export default function HeroSection() {
         </div>
 
         {/* Title */}
-        <div ref={titleRef} className="space-y-4">
-          <h1 className="text-6xl md:text-8xl font-bold leading-tight text-balance">
+        <div ref={titleRef} className="space-y-3">
+          <h1 className="text-5xl md:text-7xl font-bold leading-tight text-balance">
             Transforming Data into{" "}
-            <span className="bg-gradient-to-r from-orange-500 via-orange-400 to-orange-600 bg-clip-text text-transparent animate-pulse">
-              Actionable Insights
+            <span className="bg-gradient-to-r from-orange-500 via-orange-400 to-orange-600 bg-clip-text text-transparent">
+              Insights
             </span>
           </h1>
         </div>
 
         {/* Description */}
-        <div ref={descriptionRef} className="pt-4">
-          <p className="text-lg md:text-xl text-muted-foreground text-balance leading-relaxed max-w-2xl mx-auto">
-            I'm Abhiraj Sharma, Data Analyst & Analytics Professional. Specialized in uncovering patterns, driving data-driven decision-making, and delivering impactful insights that fuel business growth and innovation across multiple industries.
+        <div ref={descriptionRef} className="pt-2">
+          <p className="text-base md:text-lg text-muted-foreground text-balance leading-relaxed max-w-2xl mx-auto">
+            Data Analyst & Analytics Professional specializing in uncovering patterns and driving data-driven decision-making for business growth.
           </p>
         </div>
 
@@ -76,8 +76,7 @@ export default function HeroSection() {
         </div>
 
         {/* Scroll Indicator */}
-        <div className="pt-12 animate-float">
-          <p className="text-xs text-muted-foreground mb-3">Scroll to explore</p>
+        <div className="pt-6 animate-float">
           <div className="w-6 h-10 border-2 border-muted-foreground rounded-full flex items-center justify-center mx-auto">
             <div className="w-1 h-2 bg-muted-foreground rounded-full animate-bounce" />
           </div>
